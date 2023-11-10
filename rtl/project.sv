@@ -287,8 +287,8 @@ always @(posedge CLOCK_50_I or negedge resetn) begin
 			
 				UOdd[1] <= Shift_Count_U[3]*32'd52; //Gonna be -52
 				VOdd[1] <= Shift_Count_V[3]*32'd52; //Gonna be -52
-				CSC_Even[0] <= Y_Even*32d'76284;
-				CSC_Odd[0] <= Y_Odd*32d'76284;
+				CSC_Even[0] <= Y_Even*32'd76284;
+				CSC_Odd[0] <= Y_Odd*32'd76284;
 				
 			
 				M1State <= S_CommonCase3;
