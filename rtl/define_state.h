@@ -36,6 +36,23 @@ typedef enum logic [3:0] {
 	S_VS_FETCH_PIXEL_DATA_3
 } VGA_SRAM_state_type;
 
+typedef enum logic [3:0] {
+	
+	CommonCase1,
+	CommonCase2,
+	CommonCase3,
+	CommonCase4,
+	CommonCase5,
+	CommonCase6
+	
+} interp_csc_states;
+
+parameter
+	Y_START_ADDRESS = 18'd0,
+	U_START_ADDRESS = 18'd38400,
+	V_START_ADDRESS = 18'd57600,
+	RGB_START_ADDRESS = 18'd146944;
+
 parameter 
    VIEW_AREA_LEFT = 160,
    VIEW_AREA_RIGHT = 480,

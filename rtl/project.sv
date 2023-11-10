@@ -1,4 +1,18 @@
 /*
+11-9-23
+Questions;
+ - How many lead in/lead out cases do we need?
+ - 
+
+Notes:
+ - Changed define_state to include common case states
+ - need to add states into project.sv file
+ - confirmthe number of lead in cases and add them so no errors show up on compilation
+
+
+*/
+
+/*
 Copyright by Henry Ko and Nicola Nicolici
 Department of Electrical and Computer Engineering
 McMaster University
@@ -80,6 +94,32 @@ logic [25:0] UART_timer;
 
 logic [6:0] value_7_segment [7:0];
 
+//COLOURSPACE CONVERSION AND INTERPOLATION
+logic [31:0] YPrimeEven;
+logic [31:0] UPrimeEven;
+logic [31:0] VPrimeEven;
+
+logic [31:0] YPrimeOdd;
+logic [31:0] UPrimeOdd;
+logic [31:0] VPrimeOdd;
+
+logic [7:0] shiftcountu [5:0];
+logic [7:0] shiftcountv [5:0];
+
+logic [7:0] YBuffer [1:0];
+
+logic [7:0] UOdd [5:0];
+logic [7:0] VOdd [5:0];
+
+logic [31:0] CSCOdd [4:0];
+logic [31:0] CSCOddBuff [4:0];
+
+logic [31:0] CSCEven [4:0];
+logic [31:0] CSCEvenBuff [4:0];
+
+interp_csc_states M1State;
+
+
 // For error detection in UART
 logic Frame_error;
 
@@ -155,15 +195,23 @@ SRAM_controller SRAM_unit (
 
 assign SRAM_ADDRESS_O[19:18] = 2'b00;
 
+
+
+
+
+
 always @(posedge CLOCK_50_I or negedge resetn) begin
 	if (~resetn) begin
 		top_state <= S_IDLE;
+		
+		M1State <= S_Lead_In1;
 		
 		UART_rx_initialize <= 1'b0;
 		UART_rx_enable <= 1'b0;
 		UART_timer <= 26'd0;
 		
 		VGA_enable <= 1'b1;
+	
 	end else begin
 
 		// By default the UART timer (used for timeout detection) is incremented
@@ -202,7 +250,20 @@ always @(posedge CLOCK_50_I or negedge resetn) begin
 				UART_timer <= 26'd0;
 			end
 		end
-
+		
+		//COLOURSPACE AND INTERPOLATION
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		default: top_state <= S_IDLE;
 
 		endcase
