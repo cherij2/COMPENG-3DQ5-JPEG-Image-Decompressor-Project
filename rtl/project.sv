@@ -95,27 +95,29 @@ logic [25:0] UART_timer;
 logic [6:0] value_7_segment [7:0];
 
 //COLOURSPACE CONVERSION AND INTERPOLATION
-logic [31:0] YPrimeEven;
-logic [31:0] UPrimeEven;
-logic [31:0] VPrimeEven;
+logic [31:0] Y_Even;
+logic [31:0] UPrime_Even;
+logic [31:0] VPrime_Even;
 
-logic [31:0] YPrimeOdd;
-logic [31:0] UPrimeOdd;
-logic [31:0] VPrimeOdd;
+logic [31:0] Y_Odd;
+logic [31:0] UPrime_Odd;
+logic [31:0] VPrime_Odd;
 
-logic [7:0] shiftcountu [5:0];
-logic [7:0] shiftcountv [5:0];
+logic [7:0] Shift_Count_U [5:0];
+logic [7:0] Shift_Count_V [5:0];
 
-logic [7:0] YBuffer [1:0];
+logic [7:0] Y_reg [1:0];
 
 logic [7:0] UOdd [5:0];
 logic [7:0] VOdd [5:0];
 
-logic [31:0] CSCOdd [4:0];
-logic [31:0] CSCOddBuff [4:0];
+logic [31:0] CSC_Odd [4:0];
+logic [31:0] CSC_Odd_buf [4:0];
 
-logic [31:0] CSCEven [4:0];
-logic [31:0] CSCEvenBuff [4:0];
+logic [31:0] CSC_Even [4:0];
+logic [31:0] CSC_Even_Buf [4:0];
+
+logic [17:0] data_counter;
 
 interp_csc_states M1State;
 
@@ -251,22 +253,96 @@ always @(posedge CLOCK_50_I or negedge resetn) begin
 			end
 		end
 		
-		//COLOURSPACE AND INTERPOLATION
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		
 		default: top_state <= S_IDLE;
 
 		endcase
+		
+		//COLOURSPACE AND INTERPOLATION
+
+		case (M1State)
+		
+			S_Lead_In1 begin:
+			
+			
+			
+			end
+
+			S_CommonCase1 begin:
+			
+				SRAM_we_n <= 1'b1;
+				
+				SRAM_address <= //address of Y(x,x) for access in CCase 3 2cc later
+				
+				UOdd[0] <= Shift_Count_U[4]*8'd21;
+				VOdd[0] <= Shift_Count_V[4]*8'd21;
+				
+				M1State <= S_CommonCase2;
+				
+			end
+			
+			S_CommonCase2 begin:
+				
+				SRAM_we_n <= 1'b1;
+			
+				UOdd[1] <= Shift_Count_U[3]*32'd52; //Gonna be -52
+				VOdd[1] <= Shift_Count_V[3]*32'd52; //Gonna be -52
+				CSC_Even[0] <= Y_Even*32d'76284;
+				CSC_Odd[0] <= Y_Odd*32d'76284;
+				
+			
+				M1State <= S_CommonCase3;
+			
+			end
+			
+			S_CommonCase3 begin:
+			
+				SRAM_we_n <= 1'b1;
+				
+				UPrime_Even <= //address / 2
+				
+				UOdd[0] <= Shift_Count_U[4]*8'd21;
+				VOdd[0] <= Shift_Count_V[4]*8'd21;
+				CSC_Even[1] <= 32'd104595*(UPrime_Even);
+				CSC_Odd[1] <= 32'd104595*((UOdd[0]-UOdd[1]+UOdd[2]+UOdd[3]-UOdd[4]+UOdd[5]+32'd128) / 256);
+
+				M1State <= S_CommonCase4;
+			
+			end
+			
+			S_CommonCase4 begin:
+			
+				SRAM_we_n <= 1'b0;
+				
+				M1State <= S_CommonCase5;
+			
+			end
+			
+			S_CommonCase5 begin:
+			
+				SRAM_we_n <= 1'b0;
+				SRAM_address <= //address of Y(x,x) for access in CCase 1 2cc later
+				
+				M1State <= S_CommonCase6;
+				
+			end
+			
+			S_CommonCase6 begin:
+			
+				SRAM_we_n <= 1'b0;
+				SRAM_address <= //address of Y(x,x) for access in CCase 2 2cc later
+			
+				/*
+				HAVE MUX TO EITHER CONTINUE TO CCASE 1
+				OR TO LEAD OUT CASE. DEPENDANT ON DATA_COUNTER(?)
+				*/
+			
+			end
+		
+		
+		endcase
+
+		
 	end
 end
 

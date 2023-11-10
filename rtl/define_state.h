@@ -38,12 +38,13 @@ typedef enum logic [3:0] {
 
 typedef enum logic [3:0] {
 	
-	CommonCase1,
-	CommonCase2,
-	CommonCase3,
-	CommonCase4,
-	CommonCase5,
-	CommonCase6
+	S_Lead_In1,
+	S_CommonCase1,
+	S_CommonCase2,
+	S_CommonCase3,
+	S_CommonCase4,
+	S_CommonCase5,
+	S_CommonCase6
 	
 } interp_csc_states;
 
