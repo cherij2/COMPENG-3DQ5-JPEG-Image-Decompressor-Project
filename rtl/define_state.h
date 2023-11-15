@@ -39,6 +39,15 @@ typedef enum logic [3:0] {
 typedef enum logic [3:0] {
 	
 	S_Lead_In1,
+	S_Lead_In2,
+	S_Lead_In3,
+	S_Lead_In4,
+	S_Lead_In5,
+	S_Lead_In6,
+	S_Lead_In7,
+	S_Lead_In8,
+	S_Lead_In9,
+	S_Lead_In10,
 	S_CommonCase1,
 	S_CommonCase2,
 	S_CommonCase3,

@@ -103,21 +103,17 @@ logic [31:0] Y_Odd;
 logic [31:0] UPrime_Odd;
 logic [31:0] VPrime_Odd;
 
-logic [7:0] Shift_Count_U [5:0];
-logic [7:0] Shift_Count_V [5:0];
+logic [31:0] Shift_Count_U [5:0];
+logic [31:0] Shift_Count_V [5:0];
 
 logic [7:0] Y_reg [1:0];
 
-logic [7:0] UOdd [5:0];
-logic [7:0] VOdd [5:0];
+logic [31:0] UOdd_Op [5:0];
+logic [31:0] VOdd_Op [5:0];
 
-logic [31:0] CSC_Odd [4:0];
-logic [31:0] CSC_Odd_buf [4:0];
-
-logic [31:0] CSC_Even [4:0];
-logic [31:0] CSC_Even_Buf [4:0];
-
-logic [17:0] data_counter;
+logic [17:0] data_counterU;
+logic [17:0] data_counterV;
+logic [17:0] data_counterY;
 
 interp_csc_states M1State;
 
@@ -264,7 +260,132 @@ always @(posedge CLOCK_50_I or negedge resetn) begin
 		
 			S_Lead_In1 begin:
 			
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= U_START_ADDRESS + data_counterU;
+				
+				data_counterU <= data_counterU + 1'b1;
+				
+				M1State <= S_Lead_In2;
 			
+			end
+			
+			S_Lead_In2 begin:
+			
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= V_START_ADDRESS + data_counterV;
+				
+				data_counterV <= data_counterV + 1'b1;
+				
+				M1State <= S_Lead_In3;
+			
+			end
+			
+			S_Lead_In3 begin:
+				
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= U_START_ADDRESS + data_counterU;
+			
+				SRAM_read_data[7:0] <= Shift_Count_U[1];
+				SRAM_read_data[15:8] <= Shift_Count_U[0];
+				
+				UOdd_Op[0] <= 32'd21 * SRAM_read_data[7:0];
+				
+				data_counterU <= data_counterU + 1'b1;
+				
+				M1State <= S_Lead_In4;
+			
+			end
+			
+			S_Lead_In4 begin:
+			
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= V_START_ADDRESS + data_counterV;
+				
+				SRAM_read_data[7:0] <= Shift_Count_V[1];
+				SRAM_read_data[15:8] <= Shift_Count_V[0];		
+			
+				UOdd_Op[1] <= 32'd52 * Shift_Count_U[1];
+				VOdd_Op[0] <= 32'd21 * SRAM_read_data[7:0];
+				
+				data_counterV <= data_counterV + 1'b1;
+			
+				M1State <= S_Lead_In5;
+			
+			end
+			
+			S_Lead_In5 begin:
+			
+				UOdd_Op[2] <= 32'd159 * Shift_Count_U[1];
+				VOdd_Op[1] <= 32'd52 * Shift_Count_V[1];
+			
+				Shift_Count_U[2] <= Shift_Count_U[0];
+				Shift_Count_U[3] <= Shift_Count_U[1];
+				
+				Shift_Count_U[1] <= SRAM_read_data[7:0];
+				Shift_Count_U[0] <= SRAM_read_data[15:8];
+				
+				M1State <= S_Lead_In6;
+				
+			end
+			
+			S_Lead_In6 begin:
+			
+				UOdd_Op[3] <= 32'd159 * Shift_Count_U[2];
+				VOdd_Op[2] <= 32'd159 * Shift_Count_V[0];
+			
+				Shift_Count_V[2] <= Shift_Count_V[0];
+				Shift_Count_V[3] <= Shift_Count_V[1];
+				
+				Shift_Count_V[1] <= SRAM_read_data[7:0];
+				Shift_Count_V[0] <= SRAM_read_data[15:8];
+				
+				M1State <= S_Lead_In7;
+			
+			end
+			
+			S_Lead_In7 begin:
+			
+				UOdd_Op[4] <= 32'd21 * Shift_Count_U[1];
+				VOdd_Op[3] <= 32'd159 * Shift_Count_V[2];
+			
+				M1State <= S_Lead_In8;
+			
+			end
+			
+			S_Lead_In8 begin:
+			
+				UOdd_Op[5] <= 32'd52 * Shift_Count_U[0];
+				VOdd_Op[4] <= 32'd21 * Shift_Count_V[1];
+				
+				M1State <= S_Lead_In9;
+			
+			end
+			
+			S_Lead_In9 begin:
+			
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= Y_START_ADDRESS + data_counterY;
+				data_counterY <= data_counterY + 1'b1;
+			
+				VOdd_Op[5] <= 32'd52 * Shift_Count_V[0];
+				
+				Shift_Count_U[4] <= Shift_Count_U[3];
+				Shift_Count_U[5] <= Shift_Count_U[3];
+				
+				Shift_Count_V[4] <= Shift_Count_V[3];
+				Shift_Count_V[5] <= Shift_Count_V[3];
+				
+				M1State <= S_Lead_In10;
+			
+			end
+			
+			S_Lead_In10 begin:
+			
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= U_START_ADDRESS + data_counterU;
+				data_counterU <= data_counterU + 1'b1;
+			
+				M1State <= S_CommonCase1;
 			
 			end
 
