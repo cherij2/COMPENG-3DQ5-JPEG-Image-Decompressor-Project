@@ -384,6 +384,12 @@ always @(posedge CLOCK_50_I or negedge resetn) begin
 				SRAM_we_n <= 1'b1;
 				SRAM_address <= U_START_ADDRESS + data_counterU;
 				data_counterU <= data_counterU + 1'b1;
+				
+				UPrime_Even <= Shift_Count_U[5];
+				VPrime_Even <= Shift_Count_V[5];
+
+				UPrime_Odd <= (Shift_Count_U[0] - Shift_Count_U[1] + Shift_Count_U[2] + Shift_Count_U[3] - Shift_Count_U[4] + Shift_Count_U[5] + 32'd128) / 32'd256;
+				VPrime_Odd <= (Shift_Count_V[0] - Shift_Count_V[1] + Shift_Count_V[2] + Shift_Count_V[3] - Shift_Count_V[4] + Shift_Count_V[5] + 32'd128) / 32'd256;
 			
 				M1State <= S_CommonCase1;
 			
