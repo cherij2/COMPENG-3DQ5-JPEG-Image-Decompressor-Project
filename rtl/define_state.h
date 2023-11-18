@@ -3,7 +3,8 @@
 // for top state - we have more states than needed
 typedef enum logic [1:0] {
 	S_IDLE,
-	S_UART_RX
+	S_UART_RX,
+	S_M1
 } top_state_type;
 
 typedef enum logic [1:0] {
@@ -36,8 +37,9 @@ typedef enum logic [3:0] {
 	S_VS_FETCH_PIXEL_DATA_3
 } VGA_SRAM_state_type;
 
-typedef enum logic [3:0] {
+typedef enum logic [4:0] {
 	
+	S_M1_IDLE,
 	S_Lead_In1,
 	S_Lead_In2,
 	S_Lead_In3,
