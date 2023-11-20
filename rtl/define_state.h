@@ -61,7 +61,18 @@ typedef enum logic [4:0] {
 	S_CommonCase3,
 	S_CommonCase4,
 	S_CommonCase5,
-	S_CommonCase6
+	S_CommonCase6,
+	S_Lead_Out1,
+	S_Lead_Out2,
+	S_Lead_Out3,
+	S_Lead_Out4,
+	S_Lead_Out5,
+	S_Lead_Out6,
+	S_Lead_Out7,
+	S_Lead_Out8,
+	S_Lead_Out9,
+	S_Lead_Out10,
+	
 	
 } interp_csc_states;
 

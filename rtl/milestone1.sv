@@ -546,7 +546,11 @@ if (~Resetn) begin
 				UPrime_Odd <= (32'd21 * Shift_Count_U[5] - UOdd_Op[1] + UOdd_Op[2] + UOdd_Op[3] - UOdd_Op[4] + 32'd21 * Shift_Count_U[0] + 32'd128) >> 8;
 				VPrime_Odd <= (32'd21 * Shift_Count_V[5] - VOdd_Op[1] + VOdd_Op[2] + VOdd_Op[3] - VOdd_Op[4] + 32'd21 * Shift_Count_V[0] + 32'd128) >> 8;
 				
+				if (data_counterU == 32'd159 && data_counterV == 32'd159) begin
 				
+					M1State <= Lead
+				
+				end
 				/*
 				HAVE MUX TO EITHER CONTINUE TO CCASE 1
 				OR TO LEAD OUT CASE. DEPENDENT ON DATA_COUNTER(?)
