@@ -263,6 +263,8 @@ always @(posedge CLOCK_50_I or negedge resetn) begin
 				top_state <= S_IDLE;
 			end
 			
+			//do we need to add something here to make m1 start?
+			
 			
 		end
 		
@@ -284,18 +286,39 @@ assign VGA_base_address = 18'd0;
 //assign SRAM_address = (top_state == S_UART_RX) ? UART_SRAM_address : VGA_SRAM_address;
 
 always_comb begin
-
+	
 	case(top_state)
-		S_IDLE: SRAM_address = VGA_SRAM_address; 
-		S_UART_RX: SRAM_address = UART_SRAM_address;
-		S_M1: SRAM_address = M1_SRAM_address;
+		S_IDLE: begin 
+			SRAM_address = VGA_SRAM_address; 
+			SRAM_write_data = 16'd0;
+			SRAM_we_n = 1'b1;
+		end
+		S_UART_RX: begin
+			SRAM_address = UART_SRAM_address; 
+			SRAM_write_data = UART_SRAM_write_data; 
+			SRAM_we_n = UART_SRAM_we_n;
+		end			
+		S_M1: begin 
+			SRAM_address = M1_SRAM_address; 
+			SRAM_write_data = M1_SRAM_write_data; 
+			SRAM_we_n =  M1_SRAM_we_n;
+		end
+		
+		default: begin 
+			
+			SRAM_address = 16'd0;
+			SRAM_write_data = 16'd0;
+			SRAM_we_n = 1'b1;
+			
+		end 
+	
 	endcase
 	
 end
 
-assign SRAM_write_data = (top_state == S_UART_RX) ? UART_SRAM_write_data : 16'd0;
+//assign SRAM_write_data = (top_state == S_UART_RX) ? UART_SRAM_write_data : 16'd0;
 
-assign SRAM_we_n = (top_state == S_UART_RX) ? UART_SRAM_we_n : 1'b1;
+//assign SRAM_we_n = (top_state == S_UART_RX) ? UART_SRAM_we_n : 1'b1;
 
 // 7 segment displays
 convert_hex_to_seven_segment unit7 (

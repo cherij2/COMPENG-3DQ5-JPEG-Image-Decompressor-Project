@@ -37,7 +37,7 @@ typedef enum logic [3:0] {
 	S_VS_FETCH_PIXEL_DATA_3
 } VGA_SRAM_state_type;
 
-typedef enum logic [4:0] {
+typedef enum logic [6:0] {
 	
 	S_M1_IDLE,
 	S_Lead_In1,
@@ -56,6 +56,7 @@ typedef enum logic [4:0] {
 	S_Lead_In14,
 	S_Lead_In15,
 	S_Lead_In16,
+	S_Lead_In17,
 	S_CommonCase1,
 	S_CommonCase2,
 	S_CommonCase3,
