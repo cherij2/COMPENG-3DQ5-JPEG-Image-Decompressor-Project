@@ -823,12 +823,17 @@ if (~Resetn) begin
 				if (data_counterU == 32'd79 && data_counterV == 32'd79) begin
 				
 					M1State <= S_Lead_Out1;
+					
 				
 				end
 				
 				else begin
 					
 					M1State <= S_CommonCase1;
+					
+					//need to get from 158 to 159
+					data_counterV <= data_counterV + 1'b1;
+					data_counterU <= data_counterU + 1'b1;
 					
 				end
 				/*
@@ -838,13 +843,442 @@ if (~Resetn) begin
 				
 			
 			end
-		
-			S_Lead_Out1: begin
 			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			//Start of Leadout, leadout has loop that repeats its self 3 times, this loop is 7cc
+			//basically a copy paste of the common case but we dont read U,V anymore
+			//new shift register values are just the last U value in the row repeated
+			
+			S_Lead_Out1: begin
 				
+				
+				SRAM_we_n <= 1'b1;
+				
+				//WE REACHED FINAL PIXEL IN ROW WE CAN STOP INCREASING READ INDEX, 
+				//data_counterV stays the same, we are reading '159' everytime
+
+				
+				SRAM_address <= V_START_ADDRESS + data_counterV;
+				
+				
+				//EVEN ODD NOT NEEDED CUZ WE JUS NEED THE TOP VALUE IN THE SHIFT REGISTER,
+				//DUPLICATE THAT VALUE EVERYTIME WE NEED TO CALUCLATE THE NEXT U'V' VALUE
+				
+				
+//				even_odd_counter <= even_odd_counter + 1'b1; 
+				//even odd counter goes to 1 so next 6 CC the UV address
+				// will not update because we need to stay at UV(6,7) for
+				// two reads
+				
+//				if (even_odd_counter == 0) begin
+//					
+//					data_counterV <= data_counterV;
+//				
+//				end else begin
+//				
+//					data_counterV <= data_counterV + 1'b1;
+//									
+//				end
+				//In this mux we're checking if we should add to the counter
+				// the first time it should be updating for UV(6,7)
+				// the next time it should stay at UV(6,7) 
+				
+				Mult1_op_1 <= 32'sd76284;
+				Mult1_op_2 <= {24'd0 , SRAM_read_data[7:0]} - 32'sd16; //Y0
+				
+				Mult2_op_1 <= 32'sd76284;
+				Mult2_op_2 <= {24'd0 , SRAM_read_data[15:8]} - 32'sd16; //Y1
+				
+				Mult3_op_1 <= 32'sd104595;
+				Mult3_op_2 <= Final_VPrime_Even - 32'sd128;
+				
+				Mult4_op_1 <= 32'sd21;
+				Mult4_op_2 <= Final_VPrime_Odd - 32'sd128;
+				
+				M1State <= S_Lead_Out2;
 			
 			end
+			
+			S_Lead_Out2: begin
 				
+				//accumulation or RGB calculations
+				R_Odd_buf <= Mult_result2 + Mult_result4;
+				G_Odd_buf <= Mult_result2;
+				B_Odd_buf <= Mult_result2;
+				
+				R_Even_buf <= Mult_result1 + Mult_result3;
+				G_Even_buf <= Mult_result1;
+				B_Even_buf <= Mult_result1;
+				
+				//WRITE STATE
+				SRAM_we_n <= 1'b0;
+				SRAM_address <= RGB_START_ADDRESS + data_counterRGB;
+				data_counterRGB <= data_counterRGB + 1'b1;
+				//rgb data count should go up everytime we write
+				
+				SRAM_write_data[7:0] <= R_Even;
+				SRAM_write_data[15:8] <= G_Even;
+				
+				Mult1_op_1 <= -32'sd52;
+				Mult1_op_2 <= {24'd0 , Shift_Count_U[3]};
+				
+				Mult2_op_1 <= -32'sd52;
+				Mult2_op_2 <= {24'd0 , Shift_Count_V[3]};
+				
+				Mult3_op_1 <= -32'sd25624;
+				Mult3_op_2 <= Final_UPrime_Even - 32'sd128;
+				
+				Mult4_op_1 <= -32'sd25624;
+				Mult4_op_2 <= Final_UPrime_Odd - 32'sd128;
+				
+				//'159' being read every time
+				Shift_Count_U[0] <= SRAM_read_data[15:0];
+				Shift_Count_U[1] <= Shift_Count_U[0];
+				Shift_Count_U[2] <= Shift_Count_U[1];
+				Shift_Count_U[3] <= Shift_Count_U[2];
+				Shift_Count_U[4] <= Shift_Count_U[3];
+				Shift_Count_U[5] <= Shift_Count_U[4];
+				
+//				if (even_odd_counter == 0) begin
+//					
+//					Shift_Count_U[0] <= SRAM_read_data[7:0];
+//				
+//				end else begin
+//				
+//					Shift_Count_U[0] <= SRAM_read_data[15:0];	
+//
+//				end
+				
+				//if the even odd counter indicates ODD that means we have
+				// gone thru once alr at this UV address so read ODD value
+				
+				
+				M1State <= S_Lead_Out3;
+			
+			end
+			S_Lead_Out3: begin
+				
+				UPrime_Odd <= UPrime_Odd + Mult_result1;
+				VPrime_Odd <= VPrime_Odd + Mult_result2;
+				
+				G_Odd_buf <= G_Odd_buf + Mult_result4;
+				G_Even_buf <= G_Even_buf + Mult_result3;
+				
+				//WRITE STATE
+				SRAM_we_n <= 1'b0;
+				SRAM_address <= RGB_START_ADDRESS + data_counterRGB;
+				data_counterRGB <= data_counterRGB + 1'b1;
+				//rgb data count should go up everytime we write
+				
+				SRAM_write_data[7:0] <= B_Even;
+				SRAM_write_data[15:8] <= R_Odd;
+				
+				Mult1_op_1 <= 32'sd159;
+				Mult1_op_2 <= {24'd0 , Shift_Count_U[3]};
+				
+				Mult2_op_1 <= 32'sd159;
+				Mult2_op_2 <= {24'd0 , Shift_Count_V[2]};
+				
+				Mult3_op_1 <= -32'sd53281;
+				Mult3_op_2 <= Final_VPrime_Even - 32'sd128;
+				
+				Mult4_op_1 <= -32'sd53281;
+				Mult4_op_2 <= Final_VPrime_Odd - 32'sd128;
+				
+				//same thing as U, reading '159' over and over again
+				
+				Shift_Count_V[0] <= SRAM_read_data[15:0];	
+				Shift_Count_V[1] <= Shift_Count_V[0];
+				Shift_Count_V[2] <= Shift_Count_V[1];
+				Shift_Count_V[3] <= Shift_Count_V[2];
+				Shift_Count_V[4] <= Shift_Count_V[3];
+				Shift_Count_V[5] <= Shift_Count_V[4];
+				
+//				if (even_odd_counter == 0) begin
+//					
+//					Shift_Count_V[0] <= SRAM_read_data[7:0];
+//				
+//				end else begin
+//				
+//					Shift_Count_V[0] <= SRAM_read_data[15:0];	
+//
+//				end
+				//if the even odd counter indicates ODD that means we have
+				// gone thru once alr at this UV address so read ODD value
+				
+				
+				M1State <= S_Lead_Out4;
+			
+			end
+			S_Lead_Out4: begin
+				
+				UPrime_Odd <= UPrime_Odd + Mult_result1;
+				VPrime_Odd <= UPrime_Odd + Mult_result2;
+			
+				G_Odd_buf <= G_Odd_buf + Mult_result4;
+				G_Even_buf <= G_Even_buf + Mult_result3;
+				
+				//WRITE STATE
+				SRAM_we_n <= 1'b0;
+				SRAM_address <= RGB_START_ADDRESS + data_counterRGB;
+				data_counterRGB <= data_counterRGB + 1'b1;
+				//rgb data count should go up everytime we write
+				
+				SRAM_write_data[7:0] <= G_Odd;
+				SRAM_write_data[15:8] <= B_Odd;
+				
+				Mult1_op_1 <= 32'sd159;
+				Mult1_op_2 <= {24'd0 , Shift_Count_U[2]};
+				
+				Mult2_op_1 <= 32'sd159;
+				Mult2_op_2 <= {24'd0 , Shift_Count_V[2]};
+			
+				Mult3_op_1 <= 32'sd132251;
+				Mult3_op_2 <= Final_UPrime_Even - 32'sd128;
+				
+				Mult4_op_1 <= 32'sd132251;
+				Mult4_op_2 <= Final_UPrime_Odd - 32'sd128;
+			
+			end
+			S_Lead_Out5: begin
+				
+				UPrime_Odd <= UPrime_Odd + Mult_result1;
+				VPrime_Odd <= UPrime_Odd + Mult_result2;
+			
+				B_Odd_buf <= B_Odd_buf + Mult_result4;
+				B_Even_buf <= B_Even_buf + Mult_result3;
+				
+				//Back to read
+				SRAM_we_n <= 1'b1;
+			
+				Mult1_op_1 <= -32'sd52;
+				Mult1_op_2 <= {24'd0 , Shift_Count_U[1]};
+				
+				Mult2_op_1 <= -32'sd52;
+				Mult2_op_2 <= {24'd0 , Shift_Count_V[1]};
+				
+				M1State <= S_Lead_Out6;
+			
+			end
+			S_Lead_Out6: begin
+				
+				SRAM_we_n <= 1'b1;
+				
+				//Y ADDRESSES STILL NEED TO BE READ, LOOP WILL END ONCE
+				//WE NO LONGER HAVE TO READ Y ADDRESSES
+				//CHECK IF Y COUNTER = 159 ON STATE 7, FINAL PAIR OF Y VALUES
+				SRAM_address <= Y_START_ADDRESS + data_counterY;
+				data_counterY <= data_counterY + 1'b1;
+				
+				Mult1_op_1 <= 32'sd21;
+				Mult1_op_2 <= {24'd0 , Shift_Count_U[0]};
+				
+				Mult2_op_1 <= 32'sd21;
+				Mult2_op_2 <= {24'd0 , Shift_Count_V[0]};
+				
+				Mult3_op_1 <= 32'sd21;
+				Mult3_op_2 <= {24'd0 , Shift_Count_U[5]};
+				
+				Mult4_op_1 <= 32'sd21;
+				Mult4_op_2 <= {24'd0 , Shift_Count_V[5]};
+				
+				R_Even_buf2 <= R_Even_buf;
+				R_Odd_buf2 <= R_Odd_buf;
+				
+				G_Even_buf2 <= G_Even_buf;
+				G_Odd_buf2 <= G_Odd_buf;
+				
+				B_Even_buf2 <= B_Even_buf;
+				B_Odd_buf2 <= B_Odd_buf;
+				
+				M1State <= S_CommonCase7;
+				
+				M1State <= S_Lead_Out7;
+			
+			end
+			S_Lead_Out7: begin
+				
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= U_START_ADDRESS + data_counterU;
+				
+				//NO LONGER READING NEW U VALUES, '159' BEING REPEATED
+//				data_counterU <= data_counterU + 1'b1;
+				
+//				if (even_odd_counter == 0) begin
+//					
+//					data_counterU <= data_counterU;
+//				
+//				end else begin
+//				
+//					data_counterU <= data_counterU + 1'b1;
+//					even_odd_counter <= 1'b0;
+//									
+//				end
+				
+				UPrime_Even <= Shift_Count_U[3];
+				VPrime_Even <= Shift_Count_V[3];
+				
+				Final_UPrime_Odd <= (Mult_result1 + Mult_result3 + UPrime_Odd + 32'd128) >>> 8;
+				Final_VPrime_Odd <= (Mult_result2 + Mult_result4 + VPrime_Odd + 32'd128) >>> 8;
+				
+				//add some counter so that the number of times loop repeasts is < 3
+				//if < 3, go to S_Lead_Out1, otherwise S_Lead_Out8
+				if (data_counterY == 8'd159) begin
+					M1State <= S_Lead_Out1;
+				end
+				
+				else begin
+					M1State <= S_Lead_Out8;
+				end
+				
+			end
+			
+			//end of loop
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			S_Lead_Out8: begin
+				
+				
+				M1State <= S_Lead_Out9;
+			
+			end
+			S_Lead_Out9: begin
+				
+				
+				M1State <= S_Lead_Out10;
+			
+			end
+			S_Lead_Out10: begin
+				
+				
+				M1State <= S_Lead_Out11;
+			
+			end
+			S_Lead_Out11: begin
+				
+				
+				M1State <= S_Lead_Out12;
+			
+			end
+			S_Lead_Out12: begin
+				
+				
+				M1State <= S_Lead_Out13;
+			
+			end
+			S_Lead_Out13: begin
+				
+				
+				M1State <= S_Lead_Out14;
+			
+			end
+			S_Lead_Out14: begin
+				
+				
+				M1State <= S_Lead_Out15;
+			
+			end
+			S_Lead_Out15: begin
+				
+				
+				M1State <= S_Lead_Out16;
+			
+			end
+			S_Lead_Out16: begin
+				
+				
+				M1State <= S_Lead_Out17;
+			
+			end
+			S_Lead_Out17: begin
+				
+				
+				M1State <= S_Lead_Out18;
+			
+			end
+			S_Lead_Out18: begin
+				
+				
+				M1State <= S_Lead_Out19;
+			
+			end
+			S_Lead_Out19: begin
+				
+				
+				M1State <= S_Lead_Out20;
+			
+			end
+			S_Lead_Out20: begin
+				
+				
+				M1State <= S_Lead_Out21;
+			
+			end
+			S_Lead_Out21: begin
+				
+				
+				M1State <= S_Lead_Out22;
+			
+			end
+			S_Lead_Out22: begin
+				
+				
+				M1State <= S_Lead_Out23;
+			
+			end
+			S_Lead_Out23: begin
+				
+				
+				M1State <= S_Lead_Out24;
+			
+			end
+			S_Lead_Out24: begin
+				
+				
+				M1State <= S_Lead_Out25;
+			
+			end
+			S_Lead_Out25: begin
+				
+				
+				M1State <= S_Lead_In1;
+			
+			end
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
 		
 		/*
 			
