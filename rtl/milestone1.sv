@@ -45,7 +45,6 @@ logic [31:0] Final_VPrime_Even;
 logic [7:0] Shift_Count_U [5:0];
 logic [7:0] Shift_Count_V [5:0];
 
-//logic [7:0] Y_reg [1:0];
 
 //logic [31:0] UOdd_Op [5:0];
 //logic [31:0] VOdd_Op [5:0];
@@ -198,6 +197,7 @@ if (~Resetn) begin
 					SRAM_we_n <= 1'b1;
 					SRAM_address <= U_START_ADDRESS + data_counterU;
 					
+					
 					M1State <= S_Lead_In1;
 				end
 			end
@@ -330,9 +330,7 @@ if (~Resetn) begin
 			
 			S_Lead_In7: begin
 				
-				SRAM_we_n <= 1'b1;
-				SRAM_address <= Y_START_ADDRESS + data_counterY;
-				data_counterY <= data_counterY + 1'b1;
+				
 				
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= VPrime_Odd + Mult_result2;
@@ -354,9 +352,11 @@ if (~Resetn) begin
 			
 			S_Lead_In8: begin
 				
-				
 				SRAM_we_n <= 1'b1;
-				SRAM_address <= U_START_ADDRESS + data_counterU;
+				SRAM_address <= Y_START_ADDRESS + data_counterY;
+				data_counterY <= data_counterY + 1'b1;
+				
+				
 			
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= VPrime_Odd + Mult_result2;
@@ -382,9 +382,11 @@ if (~Resetn) begin
 			end
 			
 			S_Lead_In9: begin
-			
+				
 				SRAM_we_n <= 1'b1;
-				SRAM_address <= V_START_ADDRESS + data_counterV; //received 2cc later	
+				SRAM_address <= U_START_ADDRESS + data_counterU;
+				
+					
 				
 			
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
@@ -407,17 +409,14 @@ if (~Resetn) begin
 			
 			S_Lead_In10: begin
 			
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= V_START_ADDRESS + data_counterV; //received 2cc later
 				
-	
 				
 				//data_counterU <= data_counterU + 1'b1;
 				// need to stay at U (4,5), to get 4, so dont run this commented code
 				
-				Mult1_op_1 <= 32'sd76284;
-				Mult1_op_2 <= {24'd0 , SRAM_read_data[7:0]} - 32'sd16; //Y0
 				
-				Mult2_op_1 <= 32'sd76284;
-				Mult2_op_2 <= {24'd0 , SRAM_read_data[15:8]} - 32'sd16; //Y1
 				
 				Final_UPrime_Even <= Shift_Count_U[3];
 				Final_VPrime_Even <= Shift_Count_V[3];
@@ -444,6 +443,11 @@ if (~Resetn) begin
 				//Y_Even[0] <= SRAM_read_data[7:0]; //Y0
 				//Y_Odd[1] <= SRAM_read_data[15:8]; //Y1
 				
+				Mult1_op_1 <= 32'sd76284;
+				Mult1_op_2 <= {24'd0 , SRAM_read_data[7:0]} - 32'sd16; //Y0
+				
+				Mult2_op_1 <= 32'sd76284;
+				Mult2_op_2 <= {24'd0 , SRAM_read_data[15:8]} - 32'sd16; //Y1
 				
 				
 				Mult3_op_1 <= 32'sd104595;
@@ -546,7 +550,9 @@ if (~Resetn) begin
 			end
 			
 			S_Lead_In14: begin
-			
+				
+				
+				
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= UPrime_Odd + Mult_result2;
 			
@@ -579,10 +585,11 @@ if (~Resetn) begin
 			end
 			
 			S_Lead_In15: begin
-			
+				
 				SRAM_we_n <= 1'b1;
 				SRAM_address <= Y_START_ADDRESS + data_counterY;
 				data_counterY <= data_counterY + 1'b1;
+				
 				
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= UPrime_Odd + Mult_result2;
@@ -606,9 +613,11 @@ if (~Resetn) begin
 			end
 			
 			S_Lead_In16: begin
-			
+				
 				SRAM_we_n <= 1'b1;
 				SRAM_address <= U_START_ADDRESS + data_counterU;
+				
+				
 			
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= UPrime_Odd + Mult_result2;
@@ -668,8 +677,10 @@ if (~Resetn) begin
 				SRAM_address <= V_START_ADDRESS + data_counterV;
 				
 				
-				//UPrime_Odd <= UPrime_Odd + Mult_result1 + Mult_result3;
-				//VPrime_Odd <= UPrime_Odd + Mult_result2 + Mult_result4;
+				
+				
+				UPrime_Odd <= UPrime_Odd + Mult_result1 + Mult_result3;
+				VPrime_Odd <= UPrime_Odd + Mult_result2 + Mult_result4;
 				
 				
 				// SINCE ODD IS 1 MORE THAN EVEN, WE CAN JUST TAKE (J-1)/2
@@ -683,6 +694,7 @@ if (~Resetn) begin
 				//G_Odd <= G_Odd_buf >> 16;
 				//B_Odd <= B_Odd_buf >> 16;
 				
+				
 				even_odd_counter <= 1'b0;
 				
 				
@@ -695,6 +707,9 @@ if (~Resetn) begin
 				
 				//WHAT DO WE DO WITH SRAM READ DATA Y VALUES? 
 				//NO REGISTER TO STORE THEM?
+				//we read directly from the sram read data, we line it up so that the 
+				//calculations requiring Y happen when SRAM read data has the Y values 
+				//available
 				
 				SRAM_we_n <= 1'b0;
 				SRAM_address <= RGB_START_ADDRESS + data_counterRGB;
@@ -713,7 +728,6 @@ if (~Resetn) begin
 				SRAM_write_data[15:8] <= R_Even;
 				SRAM_write_data[7:0] <= G_Even;
 				
-				
 				Mult1_op_1 <= 32'sd76284;
 				Mult1_op_2 <= {24'd0 , SRAM_read_data[7:0]} - 32'sd16; //Y0
 				
@@ -725,6 +739,8 @@ if (~Resetn) begin
 				
 				Mult4_op_1 <= 32'sd104595;
 				Mult4_op_2 <= Final_VPrime_Odd - 32'sd128;
+				
+				
 				
 				
 				M1State <= S_CommonCase2;
@@ -827,10 +843,7 @@ if (~Resetn) begin
 			
 			S_CommonCase4: begin
 				
-				//Back to read
-				SRAM_we_n <= 1'b1;
-				SRAM_address <= Y_START_ADDRESS + data_counterY;
-				data_counterY <= data_counterY + 1'b1;
+				
 				
 				SRAM_we_n <= 1'b1;
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
@@ -864,22 +877,13 @@ if (~Resetn) begin
 			end
 			
 			S_CommonCase5: begin
-			
+				
+				//Back to read
 				SRAM_we_n <= 1'b1;
-				SRAM_address <= U_START_ADDRESS + data_counterU;
-			
+				SRAM_address <= Y_START_ADDRESS + data_counterY;
+				data_counterY <= data_counterY + 1'b1;
 				
-				if (even_odd_counter == 0) begin
-					
-					Shift_Count_U[0] <= SRAM_read_data[7:0];
 				
-				end else begin
-				
-					Shift_Count_U[0] <= SRAM_read_data[15:0];
-					
-				end
-				//if the even odd counter indicates ODD that means we have
-				// gone thru once alr at this UV address so read ODD value
 				
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= UPrime_Odd + Mult_result2;
@@ -903,17 +907,22 @@ if (~Resetn) begin
 			S_CommonCase6: begin
 				
 				SRAM_we_n <= 1'b1;
-				SRAM_address <= V_START_ADDRESS + data_counterV;
+				SRAM_address <= U_START_ADDRESS + data_counterU;
+			
 				
 				if (even_odd_counter == 0) begin
 					
-					data_counterV <= data_counterV;
+					Shift_Count_U[0] <= SRAM_read_data[7:0];
 				
 				end else begin
 				
-					data_counterV <= data_counterV + 1'b1;
-									
+					Shift_Count_U[0] <= SRAM_read_data[15:0];
+					
 				end
+				//if the even odd counter indicates ODD that means we have
+				// gone thru once alr at this UV address so read ODD value
+				
+				
 				
 				Mult1_op_1 <= 32'sd21;
 				Mult1_op_2 <= {24'd0 , Shift_Count_U[0]};
@@ -942,8 +951,19 @@ if (~Resetn) begin
 			end
 			
 			S_CommonCase7: begin
-			
 				
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= V_START_ADDRESS + data_counterV;
+				
+				if (even_odd_counter == 0) begin
+					
+					data_counterV <= data_counterV;
+				
+				end else begin
+				
+					data_counterV <= data_counterV + 1'b1;
+									
+				end
 				
 				
 				col_counter <= col_counter + 8'd1;
@@ -983,6 +1003,8 @@ if (~Resetn) begin
 				
 				Final_UPrime_Odd <= (Mult_result1 + Mult_result3 + UPrime_Odd + 32'd128) >>> 8;
 				Final_VPrime_Odd <= (Mult_result2 + Mult_result4 + VPrime_Odd + 32'd128) >>> 8;
+				
+				
 				
 				if (col_counter == 8'd79) begin
 					
