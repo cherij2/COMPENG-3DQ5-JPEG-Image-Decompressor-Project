@@ -42,8 +42,8 @@ logic [31:0] Final_UPrime_Even;
 logic [31:0] Final_VPrime_Even;
 
 
-logic [31:0] Shift_Count_U [5:0];
-logic [31:0] Shift_Count_V [5:0];
+logic [7:0] Shift_Count_U [5:0];
+logic [7:0] Shift_Count_V [5:0];
 
 //logic [7:0] Y_reg [1:0];
 
@@ -195,6 +195,8 @@ if (~Resetn) begin
 			S_M1_IDLE: begin
 				if(M1_Enable == 1'b1) begin
 					
+					SRAM_we_n <= 1'b1;
+					SRAM_address <= U_START_ADDRESS + data_counterU;
 					
 					M1State <= S_Lead_In1;
 				end
@@ -203,7 +205,7 @@ if (~Resetn) begin
 			S_Lead_In1: begin
 			
 				SRAM_we_n <= 1'b1;
-				SRAM_address <= U_START_ADDRESS + data_counterU;
+				SRAM_address <= V_START_ADDRESS + data_counterV;
 				
 				data_counterU <= data_counterU + 1'b1;
 				col_counter <= col_counter + 8'd1;
@@ -215,7 +217,7 @@ if (~Resetn) begin
 			S_Lead_In2: begin
 			
 				SRAM_we_n <= 1'b1;
-				SRAM_address <= V_START_ADDRESS + data_counterV;
+				SRAM_address <= U_START_ADDRESS + data_counterU;
 				
 				data_counterV <= data_counterV + 1'b1;
 				
@@ -226,7 +228,8 @@ if (~Resetn) begin
 			S_Lead_In3: begin
 				
 				SRAM_we_n <= 1'b1;
-				SRAM_address <= U_START_ADDRESS + data_counterU;
+				//check
+				SRAM_address <= V_START_ADDRESS + data_counterV;
 				
 				//check later if 0 and 1 are in correct spots shift reg
 				Shift_Count_U[1] <= SRAM_read_data[7:0]; //0
@@ -250,9 +253,7 @@ if (~Resetn) begin
 			
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				
-				SRAM_we_n <= 1'b1;
-				//check
-				SRAM_address <= V_START_ADDRESS + data_counterV;
+				
 				
 				Shift_Count_V[1] <= SRAM_read_data[7:0];
 				Shift_Count_V[0] <= SRAM_read_data[15:8];		
@@ -279,7 +280,7 @@ if (~Resetn) begin
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= VPrime_Odd + Mult_result2;
 				
-				//(159*U)
+				//(159*U0)
 				Mult1_op_1 <= 32'sd159;
 				Mult1_op_2 <= {24'd0 , Shift_Count_U[1]};
 				
@@ -306,7 +307,7 @@ if (~Resetn) begin
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= VPrime_Odd + Mult_result2;
 				
-				//(159*U)
+				//(159*U1)
 				Mult1_op_1 <= 32'sd159;
 				Mult1_op_2 <= {24'd0 , Shift_Count_U[2]};
 				
@@ -329,6 +330,10 @@ if (~Resetn) begin
 			
 			S_Lead_In7: begin
 				
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= Y_START_ADDRESS + data_counterY;
+				data_counterY <= data_counterY + 1'b1;
+				
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= VPrime_Odd + Mult_result2;
 				
@@ -348,6 +353,10 @@ if (~Resetn) begin
 			end
 			
 			S_Lead_In8: begin
+				
+				
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= U_START_ADDRESS + data_counterU;
 			
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= VPrime_Odd + Mult_result2;
@@ -374,12 +383,15 @@ if (~Resetn) begin
 			
 			S_Lead_In9: begin
 			
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= V_START_ADDRESS + data_counterV; //received 2cc later	
+				
+			
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= VPrime_Odd + Mult_result2 + Mult_result3;
 			
-				SRAM_we_n <= 1'b1;
-				SRAM_address <= Y_START_ADDRESS + data_counterY;
-				data_counterY <= data_counterY + 1'b1;
+				
+				
 			
 				//VOdd_Op[5] <= 32'd52 * Shift_Count_V[0]; DONE IN PREV STATE
 				
@@ -395,11 +407,17 @@ if (~Resetn) begin
 			
 			S_Lead_In10: begin
 			
-				SRAM_we_n <= 1'b1;
-				SRAM_address <= U_START_ADDRESS + data_counterU;
+				
+	
 				
 				//data_counterU <= data_counterU + 1'b1;
 				// need to stay at U (4,5), to get 4, so dont run this commented code
+				
+				Mult1_op_1 <= 32'sd76284;
+				Mult1_op_2 <= {24'd0 , SRAM_read_data[7:0]} - 32'sd16; //Y0
+				
+				Mult2_op_1 <= 32'sd76284;
+				Mult2_op_2 <= {24'd0 , SRAM_read_data[15:8]} - 32'sd16; //Y1
 				
 				Final_UPrime_Even <= Shift_Count_U[3];
 				Final_VPrime_Even <= Shift_Count_V[3];
@@ -419,8 +437,6 @@ if (~Resetn) begin
 
 			S_Lead_In11: begin //CHANGE TO LEAD INS
 			
-				SRAM_we_n <= 1'b1;
-				SRAM_address <= V_START_ADDRESS + data_counterV; //received 2cc later
 				//data_counterV <= data_counterV + 1'b1;
 				// need to stay at V (4,5) so dont run this commented code
 		
@@ -428,11 +444,7 @@ if (~Resetn) begin
 				//Y_Even[0] <= SRAM_read_data[7:0]; //Y0
 				//Y_Odd[1] <= SRAM_read_data[15:8]; //Y1
 				
-				Mult1_op_1 <= 32'sd76284;
-				Mult1_op_2 <= {24'd0 , SRAM_read_data[7:0]} - 32'sd16; //Y0
 				
-				Mult2_op_1 <= 32'sd76284;
-				Mult2_op_2 <= {24'd0 , SRAM_read_data[15:8]} - 32'sd16; //Y1
 				
 				Mult3_op_1 <= 32'sd104595;
 				Mult3_op_2 <= Final_VPrime_Even - 32'sd128;
@@ -568,6 +580,10 @@ if (~Resetn) begin
 			
 			S_Lead_In15: begin
 			
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= Y_START_ADDRESS + data_counterY;
+				data_counterY <= data_counterY + 1'b1;
+				
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= UPrime_Odd + Mult_result2;
 			
@@ -591,12 +607,14 @@ if (~Resetn) begin
 			
 			S_Lead_In16: begin
 			
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= U_START_ADDRESS + data_counterU;
+			
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= UPrime_Odd + Mult_result2;
 			
-				SRAM_we_n <= 1'b1;
-				SRAM_address <= Y_START_ADDRESS + data_counterY;
-				data_counterY <= data_counterY + 1'b1;
+				
+				
 				
 				//Here we DONT increase data counter U because next time we need U(6,7)
 				
@@ -647,7 +665,7 @@ if (~Resetn) begin
 			S_Lead_In17: begin
 			
 				SRAM_we_n <= 1'b1;
-				SRAM_address <= U_START_ADDRESS + data_counterU;
+				SRAM_address <= V_START_ADDRESS + data_counterV;
 				
 				
 				//UPrime_Odd <= UPrime_Odd + Mult_result1 + Mult_result3;
@@ -667,6 +685,8 @@ if (~Resetn) begin
 				
 				even_odd_counter <= 1'b0;
 				
+				
+
 				M1State <= S_CommonCase1;
 			
 			end
@@ -676,8 +696,10 @@ if (~Resetn) begin
 				//WHAT DO WE DO WITH SRAM READ DATA Y VALUES? 
 				//NO REGISTER TO STORE THEM?
 				
-				SRAM_we_n <= 1'b1;
-				SRAM_address <= V_START_ADDRESS + data_counterV;
+				SRAM_we_n <= 1'b0;
+				SRAM_address <= RGB_START_ADDRESS + data_counterRGB;
+				data_counterRGB <= data_counterRGB + 1'b1;
+				//rgb data count should go up everytime we write A PAIR OF RGB VALUES
 				
 				
 				//from leadin case we go from U4 -> U5
@@ -687,21 +709,10 @@ if (~Resetn) begin
 				// will not update because we need to stay at UV(6,7) for
 				// two reads
 				
-				//CHECKS IF WE NEED TO READ THE EVEN OR ODD VALUE IN THE PAIR
-				//doesnt check the above even_odd_counter statement until 
-				//next period
-				if (even_odd_counter == 0) begin
-					
-					data_counterV <= data_counterV;
+				//WRITE STATE
+				SRAM_write_data[15:8] <= R_Even;
+				SRAM_write_data[7:0] <= G_Even;
 				
-				end else begin
-				
-					data_counterV <= data_counterV + 1'b1;
-									
-				end
-				//In this mux we're checking if we should add to the counter
-				// the first time it should be updating for UV(6,7)
-				// the next time it should stay at UV(6,7) 
 				
 				Mult1_op_1 <= 32'sd76284;
 				Mult1_op_2 <= {24'd0 , SRAM_read_data[7:0]} - 32'sd16; //Y0
@@ -722,6 +733,11 @@ if (~Resetn) begin
 			
 			S_CommonCase2: begin
 				
+				SRAM_we_n <= 1'b0;
+				SRAM_address <= RGB_START_ADDRESS + data_counterRGB;
+				data_counterRGB <= data_counterRGB + 1'b1;
+				//rgb data count should go up everytime we write A PAIR OF RGB VALUES
+				
 				R_Odd_buf <= Mult_result2 + Mult_result4;
 				G_Odd_buf <= Mult_result2;
 				B_Odd_buf <= Mult_result2;
@@ -731,13 +747,8 @@ if (~Resetn) begin
 				B_Even_buf <= Mult_result1;
 				
 				//WRITE STATE
-				SRAM_we_n <= 1'b0;
-				SRAM_address <= RGB_START_ADDRESS + data_counterRGB;
-				data_counterRGB <= data_counterRGB + 1'b1;
-				//rgb data count should go up everytime we write A PAIR OF RGB VALUES
-				
-				SRAM_write_data[7:0] <= R_Even;
-				SRAM_write_data[15:8] <= G_Even;
+				SRAM_write_data[15:8] <= B_Even;
+				SRAM_write_data[7:0] <= R_Odd;
 				
 				Mult1_op_1 <= -32'sd52;
 				Mult1_op_2 <= {24'd0 , Shift_Count_U[3]};
@@ -757,23 +768,18 @@ if (~Resetn) begin
 				Shift_Count_U[4] <= Shift_Count_U[3];
 				Shift_Count_U[5] <= Shift_Count_U[4];
 				
-				if (even_odd_counter == 0) begin
-					
-					Shift_Count_U[0] <= SRAM_read_data[7:0];
 				
-				end else begin
-				
-					Shift_Count_U[0] <= SRAM_read_data[15:0];
-					
-				end
-				//if the even odd counter indicates ODD that means we have
-				// gone thru once alr at this UV address so read ODD value
 				
 				M1State <= S_CommonCase3;
 				
 			end
 			
 			S_CommonCase3: begin
+				
+				SRAM_we_n <= 1'b0;
+				SRAM_address <= RGB_START_ADDRESS + data_counterRGB;
+				data_counterRGB <= data_counterRGB + 1'b1;
+				//rgb data count should go up everytime we write A PAIR OF RGB VALUES
 				
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= VPrime_Odd + Mult_result2;
@@ -782,13 +788,8 @@ if (~Resetn) begin
 				G_Even_buf <= G_Even_buf + Mult_result3;
 				
 				//WRITE STATE
-				SRAM_we_n <= 1'b0;
-				SRAM_address <= RGB_START_ADDRESS + data_counterRGB;
-				data_counterRGB <= data_counterRGB + 1'b1;
-				//rgb data count should go up everytime we write
-				
-				SRAM_write_data[7:0] <= B_Even;
-				SRAM_write_data[15:8] <= R_Odd;
+				SRAM_write_data[15:8] <= G_Odd;
+				SRAM_write_data[7:0] <= B_Odd;
 				
 				Mult1_op_1 <= 32'sd159;
 				Mult1_op_2 <= {24'd0 , Shift_Count_U[3]};
@@ -826,20 +827,24 @@ if (~Resetn) begin
 			
 			S_CommonCase4: begin
 				
+				//Back to read
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= Y_START_ADDRESS + data_counterY;
+				data_counterY <= data_counterY + 1'b1;
+				
+				SRAM_we_n <= 1'b1;
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= UPrime_Odd + Mult_result2;
 			
 				G_Odd_buf <= G_Odd_buf + Mult_result4;
 				G_Even_buf <= G_Even_buf + Mult_result3;
 				
-				//WRITE STATE
-				SRAM_we_n <= 1'b0;
-				SRAM_address <= RGB_START_ADDRESS + data_counterRGB;
+				
+				
 				data_counterRGB <= data_counterRGB + 1'b1;
 				//rgb data count should go up everytime we write
 				
-				SRAM_write_data[7:0] <= G_Odd;
-				SRAM_write_data[15:8] <= B_Odd;
+				
 				
 				Mult1_op_1 <= 32'sd159;
 				Mult1_op_2 <= {24'd0 , Shift_Count_U[2]};
@@ -859,6 +864,22 @@ if (~Resetn) begin
 			end
 			
 			S_CommonCase5: begin
+			
+				SRAM_we_n <= 1'b1;
+				SRAM_address <= U_START_ADDRESS + data_counterU;
+			
+				
+				if (even_odd_counter == 0) begin
+					
+					Shift_Count_U[0] <= SRAM_read_data[7:0];
+				
+				end else begin
+				
+					Shift_Count_U[0] <= SRAM_read_data[15:0];
+					
+				end
+				//if the even odd counter indicates ODD that means we have
+				// gone thru once alr at this UV address so read ODD value
 				
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
 				VPrime_Odd <= UPrime_Odd + Mult_result2;
@@ -866,8 +887,7 @@ if (~Resetn) begin
 				B_Odd_buf <= B_Odd_buf + Mult_result4;
 				B_Even_buf <= B_Even_buf + Mult_result3;
 				
-				//Back to read
-				SRAM_we_n <= 1'b1;
+				
 			
 				Mult1_op_1 <= -32'sd52;
 				Mult1_op_2 <= {24'd0 , Shift_Count_U[1]};
@@ -883,8 +903,17 @@ if (~Resetn) begin
 			S_CommonCase6: begin
 				
 				SRAM_we_n <= 1'b1;
-				SRAM_address <= Y_START_ADDRESS + data_counterY;
-				data_counterY <= data_counterY + 1'b1;
+				SRAM_address <= V_START_ADDRESS + data_counterV;
+				
+				if (even_odd_counter == 0) begin
+					
+					data_counterV <= data_counterV;
+				
+				end else begin
+				
+					data_counterV <= data_counterV + 1'b1;
+									
+				end
 				
 				Mult1_op_1 <= 32'sd21;
 				Mult1_op_2 <= {24'd0 , Shift_Count_U[0]};
@@ -914,9 +943,18 @@ if (~Resetn) begin
 			
 			S_CommonCase7: begin
 			
-				SRAM_we_n <= 1'b1;
-				SRAM_address <= U_START_ADDRESS + data_counterU;
+				
+				
+				
 				col_counter <= col_counter + 8'd1;
+				
+				//CHECKS IF WE NEED TO READ THE EVEN OR ODD VALUE IN THE PAIR
+				//doesnt check the above even_odd_counter statement until 
+				//next period
+			
+				//In this mux we're checking if we should add to the counter
+				// the first time it should be updating for UV(6,7)
+				// the next time it should stay at UV(6,7)
 				
 				
 				//after lead-in case and first common case run, we need
@@ -1059,8 +1097,8 @@ if (~Resetn) begin
 				data_counterRGB <= data_counterRGB + 1'b1;
 				//rgb data count should go up everytime we write
 				
-				SRAM_write_data[7:0] <= R_Even;
-				SRAM_write_data[15:8] <= G_Even;
+				SRAM_write_data[15:8] <= R_Even;
+				SRAM_write_data[7:0] <= G_Even;
 				
 				Mult1_op_1 <= -32'sd52;
 				Mult1_op_2 <= {24'd0 , Shift_Count_U[3]};
@@ -1113,8 +1151,8 @@ if (~Resetn) begin
 				data_counterRGB <= data_counterRGB + 1'b1;
 				//rgb data count should go up everytime we write
 				
-				SRAM_write_data[7:0] <= B_Even;
-				SRAM_write_data[15:8] <= R_Odd;
+				SRAM_write_data[15:8] <= B_Even;
+				SRAM_write_data[7:0] <= R_Odd;
 				
 				Mult1_op_1 <= 32'sd159;
 				Mult1_op_2 <= {24'd0 , Shift_Count_U[3]};
@@ -1167,8 +1205,8 @@ if (~Resetn) begin
 				data_counterRGB <= data_counterRGB + 1'b1;
 				//rgb data count should go up everytime we write
 				
-				SRAM_write_data[7:0] <= G_Odd;
-				SRAM_write_data[15:8] <= B_Odd;
+				SRAM_write_data[15:8] <= G_Odd;
+				SRAM_write_data[7:0] <= B_Odd;
 				
 				Mult1_op_1 <= 32'sd159;
 				Mult1_op_2 <= {24'd0 , Shift_Count_U[2]};
@@ -1355,8 +1393,8 @@ if (~Resetn) begin
 				data_counterRGB <= data_counterRGB + 1'b1;
 				//rgb data count should go up everytime we write
 				
-				SRAM_write_data[7:0] <= R_Even;
-				SRAM_write_data[15:8] <= G_Even;
+				SRAM_write_data[15:8] <= R_Even;
+				SRAM_write_data[7:0] <= G_Even;
 				
 				Mult1_op_1 <= -32'sd52;
 				Mult1_op_2 <= {24'd0 , Shift_Count_U[3]};
@@ -1406,8 +1444,8 @@ if (~Resetn) begin
 				data_counterRGB <= data_counterRGB + 1'b1;
 				//rgb data count should go up everytime we write
 				
-				SRAM_write_data[7:0] <= B_Even;
-				SRAM_write_data[15:8] <= R_Odd;
+				SRAM_write_data[15:8] <= B_Even;
+				SRAM_write_data[7:0] <= R_Odd;
 				
 				Mult1_op_1 <= 32'sd159;
 				Mult1_op_2 <= {24'd0 , Shift_Count_U[3]};
@@ -1456,8 +1494,8 @@ if (~Resetn) begin
 				data_counterRGB <= data_counterRGB + 1'b1;
 				//rgb data count should go up everytime we write
 				
-				SRAM_write_data[7:0] <= G_Odd;
-				SRAM_write_data[15:8] <= B_Odd;
+				SRAM_write_data[15:8] <= G_Odd;
+				SRAM_write_data[7:0] <= B_Odd;
 				
 				Mult1_op_1 <= 32'sd159;
 				Mult1_op_2 <= {24'd0 , Shift_Count_U[2]};
@@ -1627,8 +1665,8 @@ if (~Resetn) begin
 				data_counterRGB <= data_counterRGB + 1'b1;
 				//rgb data count should go up everytime we write
 				
-				SRAM_write_data[7:0] <= R_Even;
-				SRAM_write_data[15:8] <= G_Even;
+				SRAM_write_data[15:8] <= R_Even;
+				SRAM_write_data[7:0] <= G_Even;
 				
 				//NO LONGER DOING INTERPOLATION, JUST RGB VALUES
 //				Mult1_op_1 <= -32'sd52;
@@ -1668,8 +1706,8 @@ if (~Resetn) begin
 				data_counterRGB <= data_counterRGB + 1'b1;
 				//rgb data count should go up everytime we write
 				
-				SRAM_write_data[7:0] <= B_Even;
-				SRAM_write_data[15:8] <= R_Odd;
+				SRAM_write_data[15:8] <= B_Even;
+				SRAM_write_data[7:0] <= R_Odd;
 				
 				//NO LONGER DOING INTERPOLATION, SHIFT COUNTER DONT MATTER
 //				Mult1_op_1 <= 32'sd159;
@@ -1708,8 +1746,8 @@ if (~Resetn) begin
 				data_counterRGB <= data_counterRGB + 1'b1;
 				//rgb data count should go up everytime we write
 				
-				SRAM_write_data[7:0] <= G_Odd;
-				SRAM_write_data[15:8] <= B_Odd;
+				SRAM_write_data[15:8] <= G_Odd;
+				SRAM_write_data[7:0] <= B_Odd;
 				
 //				Mult1_op_1 <= 32'sd159;
 //				Mult1_op_2 <= {24'd0 , Shift_Count_U[2]};
@@ -1877,8 +1915,8 @@ if (~Resetn) begin
 				data_counterRGB <= data_counterRGB + 1'b1;
 				//rgb data count should go up everytime we write
 				
-				SRAM_write_data[7:0] <= R_Even;
-				SRAM_write_data[15:8] <= G_Even;
+				SRAM_write_data[15:8] <= R_Even;
+				SRAM_write_data[7:0] <= G_Even;
 				
 				//NO LONGER DOING INTERPOLATION, JUST RGB VALUES
 //				Mult1_op_1 <= -32'sd52;
@@ -1911,8 +1949,8 @@ if (~Resetn) begin
 				
 				//rgb data count should go up everytime we write
 				
-				SRAM_write_data[7:0] <= B_Even;
-				SRAM_write_data[15:8] <= R_Odd;
+				SRAM_write_data[15:8] <= B_Even;
+				SRAM_write_data[7:0] <= R_Odd;
 				
 				//NO LONGER DOING INTERPOLATION, SHIFT COUNTER DONT MATTER
 //				Mult1_op_1 <= 32'sd159;
@@ -1952,8 +1990,8 @@ if (~Resetn) begin
 					SRAM_address <= U_START_ADDRESS;
 					
 				end
-				SRAM_write_data[7:0] <= G_Odd;
-				SRAM_write_data[15:8] <= B_Odd;
+				SRAM_write_data[15:8] <= G_Odd;
+				SRAM_write_data[7:0] <= B_Odd;
 				
 //				Mult1_op_1 <= 32'sd159;
 //				Mult1_op_2 <= {24'd0 , Shift_Count_U[2]};

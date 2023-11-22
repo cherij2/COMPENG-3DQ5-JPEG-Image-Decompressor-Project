@@ -38,6 +38,7 @@ add wave -hex UUT/Milestone1/Shift_Count_U
 add wave -hex UUT/Milestone1/Shift_Count_V
 
 
+
 add wave -hex UUT/Milestone1/UPrime_Odd
 add wave -hex UUT/Milestone1/VPrime_Odd
 
@@ -45,4 +46,47 @@ add wave -hex UUT/Milestone1/Final_UPrime_Odd
 add wave -hex UUT/Milestone1/Final_VPrime_Odd
 add wave -hex UUT/Milestone1/Final_UPrime_Even
 add wave -hex UUT/Milestone1/Final_VPrime_Even
+
+add wave -hex UUT/Milestone1/Mult_result1
+add wave -hex UUT/Milestone1/Mult_result2
+add wave -hex UUT/Milestone1/Mult_result3
+add wave -hex UUT/Milestone1/Mult_result4
+
+
+add wave -hex UUT/Milestone1/Mult1_op_1
+add wave -hex UUT/Milestone1/Mult1_op_2
+add wave -hex UUT/Milestone1/Mult2_op_1
+add wave -hex UUT/Milestone1/Mult2_op_2
+add wave -hex UUT/Milestone1/Mult3_op_1
+add wave -hex UUT/Milestone1/Mult3_op_2
+add wave -hex UUT/Milestone1/Mult4_op_1
+add wave -hex UUT/Milestone1/Mult4_op_2
+
+add wave -divider -height 10 {RGB stuff}
+
+
+add wave -hex UUT/Milestone1/R_Even
+add wave -hex UUT/Milestone1/G_Even
+add wave -hex UUT/Milestone1/B_Even
+
+add wave -hex UUT/Milestone1/R_Odd
+add wave -hex UUT/Milestone1/G_Odd
+add wave -hex UUT/Milestone1/B_Odd
+
+add wave -hex UUT/Milestone1/R_Even_buf
+add wave -hex UUT/Milestone1/G_Even_buf
+add wave -hex UUT/Milestone1/B_Even_buf
+
+add wave -hex UUT/Milestone1/R_Odd_buf
+add wave -hex UUT/Milestone1/G_Odd_buf
+add wave -hex UUT/Milestone1/B_Odd_buf
+
+add wave -hex UUT/Milestone1/R_Even_buf2
+add wave -hex UUT/Milestone1/G_Even_buf2
+add wave -hex UUT/Milestone1/B_Even_buf2
+
+add wave -hex UUT/Milestone1/R_Odd_buf2
+add wave -hex UUT/Milestone1/G_Odd_buf2
+add wave -hex UUT/Milestone1/B_Odd_buf2
+
 
