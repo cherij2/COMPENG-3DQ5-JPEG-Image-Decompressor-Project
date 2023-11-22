@@ -719,7 +719,7 @@ if (~Resetn) begin
 				
 				//from leadin case we go from U4 -> U5
 				//counter goes from 0 -> 1
-				even_odd_counter <= even_odd_counter + 1'b1; 
+				even_odd_counter <= ~even_odd_counter; 
 				//even odd counter goes to 1 so next 6 CC the UV address
 				// will not update because we need to stay at UV(6,7) for
 				// two reads
@@ -729,10 +729,10 @@ if (~Resetn) begin
 				SRAM_write_data[7:0] <= G_Even;
 				
 				Mult1_op_1 <= 32'sd76284;
-				Mult1_op_2 <= {24'd0 , SRAM_read_data[7:0]} - 32'sd16; //Y0
+				Mult1_op_2 <= {24'd0 , SRAM_read_data[15:8]} - 32'sd16; //Y0
 				
 				Mult2_op_1 <= 32'sd76284;
-				Mult2_op_2 <= {24'd0 , SRAM_read_data[15:8]} - 32'sd16; //Y1
+				Mult2_op_2 <= {24'd0 , SRAM_read_data[7:0]} - 32'sd16; //Y1
 				
 				Mult3_op_1 <= 32'sd104595;
 				Mult3_op_2 <= Final_VPrime_Even - 32'sd128;
@@ -784,6 +784,16 @@ if (~Resetn) begin
 				Shift_Count_U[4] <= Shift_Count_U[3];
 				Shift_Count_U[5] <= Shift_Count_U[4];
 				
+				if (even_odd_counter == 0) begin
+					
+					Shift_Count_U[0] <= SRAM_read_data[7:0];
+				
+				end else begin
+				
+					Shift_Count_U[0] <= SRAM_read_data[15:8];
+					
+				end
+				
 				
 				
 				M1State <= S_CommonCase3;
@@ -831,7 +841,7 @@ if (~Resetn) begin
 				
 				end else begin
 				
-					Shift_Count_V[0] <= SRAM_read_data[15:0];	
+					Shift_Count_V[0] <= SRAM_read_data[15:8];	
 
 				end
 				//if the even odd counter indicates ODD that means we have
@@ -854,7 +864,7 @@ if (~Resetn) begin
 				
 				
 				
-				data_counterRGB <= data_counterRGB + 1'b1;
+				//data_counterRGB <= data_counterRGB + 1'b1;
 				//rgb data count should go up everytime we write
 				
 				
@@ -910,15 +920,7 @@ if (~Resetn) begin
 				SRAM_address <= U_START_ADDRESS + data_counterU;
 			
 				
-				if (even_odd_counter == 0) begin
-					
-					Shift_Count_U[0] <= SRAM_read_data[7:0];
 				
-				end else begin
-				
-					Shift_Count_U[0] <= SRAM_read_data[15:0];
-					
-				end
 				//if the even odd counter indicates ODD that means we have
 				// gone thru once alr at this UV address so read ODD value
 				
@@ -994,7 +996,7 @@ if (~Resetn) begin
 					col_counter <= col_counter + 8'd1;
 					data_counterU <= data_counterU + 1'b1;
 					
-					even_odd_counter <= 1'b0;
+					//even_odd_counter <= 1'b0;
 									
 				end
 				
@@ -1009,7 +1011,6 @@ if (~Resetn) begin
 				if (col_counter == 8'd79) begin
 					
 					// oddevencounter = 1, U159, col counter = 79
-					even_odd_counter <= even_odd_counter + 1'b1; 
 					col_counter <= 8'd0;
 					M1State <= S_Lead_Out1;
 					//col counter = 0
@@ -1063,7 +1064,8 @@ if (~Resetn) begin
 				//reading 158,159
 				SRAM_address <= V_START_ADDRESS + data_counterV;
 				
-				
+				even_odd_counter <= ~even_odd_counter; 
+
 				//EVEN ODD NOT NEEDED CUZ WE JUS NEED THE TOP VALUE IN THE SHIFT REGISTER,
 				//DUPLICATE THAT VALUE EVERYTIME WE NEED TO CALUCLATE THE NEXT U'V' VALUE
 				
