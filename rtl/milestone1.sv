@@ -245,7 +245,9 @@ if (~Resetn) begin
 					Shift_Count_V[3] <= 8'd0;
 					Shift_Count_V[4] <= 8'd0;
 					Shift_Count_V[5] <= 8'd0;
-											
+					
+					even_odd_counter <= 1'b0;
+					
 					Y_guys <= 18'd0;
 					
 					M1State <= S_Lead_In1;
@@ -728,7 +730,7 @@ if (~Resetn) begin
 				UPrime_Odd <= 32'd0;
 				VPrime_Odd <= 32'd0;
 				
-				even_odd_counter <= 1'b0;
+				
 				
 				
 
@@ -1048,7 +1050,6 @@ if (~Resetn) begin
 					
 					// oddevencounter = 1, U159, col counter = 79
 					col_counter <= 8'd0;
-					
 					M1State <= S_Lead_Out1;
 					//col counter = 0
 				
