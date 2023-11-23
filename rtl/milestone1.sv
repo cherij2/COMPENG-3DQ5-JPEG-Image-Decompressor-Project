@@ -142,13 +142,13 @@ if (~Resetn) begin
 		//UPrime_Even <= 32'd0;
 		//VPrime_Even <= 32'd0;
 
-		UPrime_Odd <= 32'd0;
-		VPrime_Odd <= 32'd0;
+		UPrime_Odd <= 32'sd0;
+		VPrime_Odd <= 32'sd0;
 
-		Final_UPrime_Odd <= 32'd0;
-		Final_VPrime_Odd <= 32'd0;
-		Final_UPrime_Even <= 32'd0;
-		Final_VPrime_Even <= 32'd0;
+		Final_UPrime_Odd <= 32'sd0;
+		Final_VPrime_Odd <= 32'sd0;
+		Final_UPrime_Even <= 32'sd0;
+		Final_VPrime_Even <= 32'sd0;
 		//M1_Enable <= 1'b1;
 		
 		//R_Even <= 32'd0;
@@ -159,30 +159,30 @@ if (~Resetn) begin
 		//G_Odd <= 32'd0;
 		//B_Odd <= 32'd0;
 
-		R_Even_buf <= 32'd0;
-		G_Even_buf <= 32'd0;
-		B_Even_buf <= 32'd0;
+		R_Even_buf <= 32'sd0;
+		G_Even_buf <= 32'sd0;
+		B_Even_buf <= 32'sd0;
 
-		R_Odd_buf <= 32'd0;
-		G_Odd_buf <= 32'd0;
-		B_Odd_buf <= 32'd0;
+		R_Odd_buf <= 32'sd0;
+		G_Odd_buf <= 32'sd0;
+		B_Odd_buf <= 32'sd0;
 
-		R_Even_buf2 <= 32'd0;
-		G_Even_buf2 <= 32'd0;
-		B_Even_buf2 <= 32'd0;
+		R_Even_buf2 <= 32'sd0;
+		G_Even_buf2 <= 32'sd0;
+		B_Even_buf2 <= 32'sd0;
 
-		R_Odd_buf2 <= 32'd0;
-		G_Odd_buf2 <= 32'd0;
-		B_Odd_buf2 <= 32'd0;
+		R_Odd_buf2 <= 32'sd0;
+		G_Odd_buf2 <= 32'sd0;
+		B_Odd_buf2 <= 32'sd0;
 		
-		Mult1_op_1 <= 32'd0;
-		Mult1_op_2 <= 32'd0;
-		Mult2_op_1 <= 32'd0; 
-		Mult2_op_2 <= 32'd0; 
-		Mult3_op_1 <= 32'd0; 
-		Mult3_op_2 <= 32'd0; 
-		Mult4_op_1 <= 32'd0; 
-		Mult4_op_2 <= 32'd0;
+		Mult1_op_1 <= 32'sd0;
+		Mult1_op_2 <= 32'sd0;
+		Mult2_op_1 <= 32'sd0; 
+		Mult2_op_2 <= 32'sd0; 
+		Mult3_op_1 <= 32'sd0; 
+		Mult3_op_2 <= 32'sd0; 
+		Mult4_op_1 <= 32'sd0; 
+		Mult4_op_2 <= 32'sd0;
 	
 		M1State <= S_M1_IDLE;
 
@@ -417,15 +417,11 @@ if (~Resetn) begin
 				// need to stay at U (4,5), to get 4, so dont run this commented code
 				
 				
-				
 				Final_UPrime_Even <= Shift_Count_U[3];
 				Final_VPrime_Even <= Shift_Count_V[3];
 
-				Final_UPrime_Odd <= (UPrime_Odd + 32'd128) >>> 8;
-				Final_VPrime_Odd <= (VPrime_Odd + 32'd128) >>> 8;
-
-				//UPrime_Odd <= (UOdd_Op[0] - UOdd_Op[1] + UOdd_Op[2] + UOdd_Op[3] - UOdd_Op[4] + UOdd_Op[5] + 32'd128) >>> 8;
-				//VPrime_Odd <= (VOdd_Op[0] - VOdd_Op[1] + VOdd_Op[2] + VOdd_Op[3] - VOdd_Op[4] + VOdd_Op[5] + 32'd128) >>> 8;
+				Final_UPrime_Odd <= (UPrime_Odd + 32'sd128) >>> 8;
+				Final_VPrime_Odd <= (VPrime_Odd + 32'sd128) >>> 8;
 				
 				UPrime_Odd <= 32'd0;
 				VPrime_Odd <= 32'd0;
@@ -434,14 +430,11 @@ if (~Resetn) begin
 			
 			end
 
-			S_Lead_In11: begin //CHANGE TO LEAD INS
+			S_Lead_In11: begin
 			
 				//data_counterV <= data_counterV + 1'b1;
 				// need to stay at V (4,5) so dont run this commented code
-		
-		
-				//Y_Even[0] <= SRAM_read_data[7:0]; //Y0
-				//Y_Odd[1] <= SRAM_read_data[15:8]; //Y1
+
 				
 				Mult1_op_1 <= 32'sd76284;
 				Mult1_op_2 <= {24'd0 , SRAM_read_data[7:0]} - 32'sd16; //Y0
@@ -453,18 +446,8 @@ if (~Resetn) begin
 				Mult3_op_1 <= 32'sd104595;
 				Mult3_op_2 <= Final_VPrime_Even - 32'sd128;
 				
-				//????
-//				Mult4_op_1 <= 32'sd21;
 				Mult4_op_1 <= 32'sd104595;
 				Mult4_op_2 <= Final_VPrime_Odd - 32'sd128;
-				
-				//R_Odd_buf <= (32'd76284 * (SRAM_read_data[15:8] - 32'd16)) + (32'd104595 * (VPrime_Odd - 32'd128)); // 76284*Y1 + 104595*V1
-				//G_Odd_buf <= 32'd76284 * (SRAM_read_data[15:8] - 32'd16); //Y1
-				//B_Odd_buf <= 32'd76284 * (SRAM_read_data[15:8] - 32'd16);
-				
-				//R_Even_buf <= (32'd76284 * (SRAM_read_data[7:0]- 32'd16)) + (32'd104595 * (VPrime_Even - 32'd128)); // 76284*Y0 + 104595*V0
-				//G_Even_buf <= 32'd76284 * (SRAM_read_data[7:0]- 32'd16); //Y0
-				//B_Even_buf <= 32'd76284 * (SRAM_read_data[7:0]- 32'd16);
 				
 				
 				M1State <= S_Lead_In12;
@@ -487,8 +470,6 @@ if (~Resetn) begin
 				Mult2_op_1 <= -32'sd52;
 				Mult2_op_2 <= {24'd0 , Shift_Count_V[3]};
 				
-				//UOdd_Op[1] <= 32'd52 * Shift_Count_U[3];
-				//VOdd_Op[1] <= 32'd52 * Shift_Count_V[3];
 				
 				Mult3_op_1 <= -32'sd25624;
 				Mult3_op_2 <= Final_UPrime_Even - 32'sd128;
@@ -496,8 +477,6 @@ if (~Resetn) begin
 				Mult4_op_1 <= -32'sd25624;
 				Mult4_op_2 <= Final_UPrime_Odd - 32'sd128;
 				
-				//G_Odd_buf <= G_Odd_buf - (32'd25624 * (UPrime_Odd - 32'd128));
-				//G_Even_buf <= G_Even_buf - (32'd25624 * (UPrime_Even - 32'd128));
 				
 				Shift_Count_U[1] <= Shift_Count_U[0];
 				Shift_Count_U[2] <= Shift_Count_U[1];
@@ -554,7 +533,7 @@ if (~Resetn) begin
 				
 				
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
-				VPrime_Odd <= UPrime_Odd + Mult_result2;
+				VPrime_Odd <= VPrime_Odd + Mult_result2;
 			
 				G_Odd_buf <= G_Odd_buf + Mult_result4;
 				G_Even_buf <= G_Even_buf + Mult_result3;
@@ -592,7 +571,7 @@ if (~Resetn) begin
 				
 				
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
-				VPrime_Odd <= UPrime_Odd + Mult_result2;
+				VPrime_Odd <= VPrime_Odd + Mult_result2;
 			
 				B_Odd_buf <= B_Odd_buf + Mult_result4;
 				B_Even_buf <= B_Even_buf + Mult_result3;
@@ -620,7 +599,7 @@ if (~Resetn) begin
 				
 			
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
-				VPrime_Odd <= UPrime_Odd + Mult_result2;
+				VPrime_Odd <= VPrime_Odd + Mult_result2;
 			
 				
 				
@@ -679,8 +658,8 @@ if (~Resetn) begin
 				
 				
 				
-				UPrime_Odd <= UPrime_Odd + Mult_result1 + Mult_result3;
-				VPrime_Odd <= UPrime_Odd + Mult_result2 + Mult_result4;
+				//UPrime_Odd <= UPrime_Odd + Mult_result1 + Mult_result3;
+				//VPrime_Odd <= UPrime_Odd + Mult_result2 + Mult_result4;
 				
 				
 				// SINCE ODD IS 1 MORE THAN EVEN, WE CAN JUST TAKE (J-1)/2
@@ -688,12 +667,14 @@ if (~Resetn) begin
 				Final_UPrime_Even <= Shift_Count_U[3];
 				Final_VPrime_Even <= Shift_Count_V[3];
 				
-				Final_UPrime_Odd <= (Mult_result1 + Mult_result3 + UPrime_Odd + 32'd128) >>> 8;
-				Final_VPrime_Odd <= (Mult_result2 + Mult_result4 + VPrime_Odd + 32'd128) >>> 8;
+				Final_UPrime_Odd <= (Mult_result1 + Mult_result3 + UPrime_Odd + 32'sd128) >>> 8;
+				Final_VPrime_Odd <= (Mult_result2 + Mult_result4 + VPrime_Odd + 32'sd128) >>> 8;
 				
 				//G_Odd <= G_Odd_buf >> 16;
 				//B_Odd <= B_Odd_buf >> 16;
 				
+				UPrime_Odd <= 32'd0;
+				VPrime_Odd <= 32'd0;
 				
 				even_odd_counter <= 1'b0;
 				
@@ -786,11 +767,11 @@ if (~Resetn) begin
 				
 				if (even_odd_counter == 0) begin
 					
-					Shift_Count_U[0] <= SRAM_read_data[7:0];
+					Shift_Count_U[0] <= SRAM_read_data[15:8];
 				
 				end else begin
 				
-					Shift_Count_U[0] <= SRAM_read_data[15:8];
+					Shift_Count_U[0] <= SRAM_read_data[7:0];
 					
 				end
 				
@@ -837,11 +818,11 @@ if (~Resetn) begin
 				
 				if (even_odd_counter == 0) begin
 					
-					Shift_Count_V[0] <= SRAM_read_data[7:0];
+					Shift_Count_V[0] <= SRAM_read_data[15:8];
 				
 				end else begin
 				
-					Shift_Count_V[0] <= SRAM_read_data[15:8];	
+					Shift_Count_V[0] <= SRAM_read_data[7:0];	
 
 				end
 				//if the even odd counter indicates ODD that means we have
@@ -857,7 +838,7 @@ if (~Resetn) begin
 				
 				SRAM_we_n <= 1'b1;
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
-				VPrime_Odd <= UPrime_Odd + Mult_result2;
+				VPrime_Odd <= VPrime_Odd + Mult_result2;
 			
 				G_Odd_buf <= G_Odd_buf + Mult_result4;
 				G_Even_buf <= G_Even_buf + Mult_result3;
@@ -893,10 +874,22 @@ if (~Resetn) begin
 				SRAM_address <= Y_START_ADDRESS + data_counterY;
 				data_counterY <= data_counterY + 1'b1;
 				
-				
+				if (even_odd_counter == 0) begin
+					
+					data_counterU <= data_counterU;
+					col_counter <= col_counter;
+					
+				end else begin
+					
+					col_counter <= col_counter + 8'd1;
+					data_counterU <= data_counterU + 1'b1;
+					
+					//even_odd_counter <= 1'b0;
+									
+				end
 				
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
-				VPrime_Odd <= UPrime_Odd + Mult_result2;
+				VPrime_Odd <= VPrime_Odd + Mult_result2;
 			
 				B_Odd_buf <= B_Odd_buf + Mult_result4;
 				B_Even_buf <= B_Even_buf + Mult_result3;
@@ -919,11 +912,21 @@ if (~Resetn) begin
 				SRAM_we_n <= 1'b1;
 				SRAM_address <= U_START_ADDRESS + data_counterU;
 			
-				
+				UPrime_Odd <= UPrime_Odd + Mult_result1;
+				VPrime_Odd <= VPrime_Odd + Mult_result2;
 				
 				//if the even odd counter indicates ODD that means we have
 				// gone thru once alr at this UV address so read ODD value
 				
+				if (even_odd_counter == 0) begin
+					
+					data_counterV <= data_counterV;
+				
+				end else begin
+				
+					data_counterV <= data_counterV + 1'b1;
+									
+				end
 				
 				
 				Mult1_op_1 <= 32'sd21;
@@ -957,15 +960,6 @@ if (~Resetn) begin
 				SRAM_we_n <= 1'b1;
 				SRAM_address <= V_START_ADDRESS + data_counterV;
 				
-				if (even_odd_counter == 0) begin
-					
-					data_counterV <= data_counterV;
-				
-				end else begin
-				
-					data_counterV <= data_counterV + 1'b1;
-									
-				end
 				
 				
 				col_counter <= col_counter + 8'd1;
@@ -986,27 +980,16 @@ if (~Resetn) begin
 				
 				// in the final case we are at oddevencoutner = 1, U157, col counter 78
 				// oddevencounter = 0(updated in commoncase1), U158, col counter = 79
-				if (even_odd_counter == 0) begin
-					
-					data_counterU <= data_counterU;
-					col_counter <= col_counter;
-					
-				end else begin
-					
-					col_counter <= col_counter + 8'd1;
-					data_counterU <= data_counterU + 1'b1;
-					
-					//even_odd_counter <= 1'b0;
-									
-				end
+				
 				
 				Final_UPrime_Even <= Shift_Count_U[3];
 				Final_VPrime_Even <= Shift_Count_V[3];
 				
-				Final_UPrime_Odd <= (Mult_result1 + Mult_result3 + UPrime_Odd + 32'd128) >>> 8;
-				Final_VPrime_Odd <= (Mult_result2 + Mult_result4 + VPrime_Odd + 32'd128) >>> 8;
+				Final_UPrime_Odd <= (Mult_result1 + Mult_result3 + UPrime_Odd + 32'sd128) >>> 8;
+				Final_VPrime_Odd <= (Mult_result2 + Mult_result4 + VPrime_Odd + 32'sd128) >>> 8;
 				
-				
+				UPrime_Odd <= 32'd0;
+				VPrime_Odd <= 32'd0;
 				
 				if (col_counter == 8'd79) begin
 					
