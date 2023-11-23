@@ -1965,30 +1965,7 @@ if (~Resetn) begin
 			S_Lead_Out25: begin
 				
 				SRAM_we_n <= 1'b1;
-				//SRAM_address <= RGB_START_ADDRESS + data_counterRGB;
-				//data_counterRGB <= data_counterRGB + 1'b1;
-				//rgb data count should go up everytime we write A PAIR OF RGB VALUES
 				
-//				UPrime_Odd <= UPrime_Odd + Mult_result1;
-//				VPrime_Odd <= VPrime_Odd + Mult_result2;
-				
-//				G_Odd_buf <= G_Odd_buf + Mult_result4;
-//				G_Even_buf <= G_Even_buf + Mult_result3;
-				
-				//WRITE STATE
-		
-				
-//				Mult1_op_1 <= 32'sd159;
-//				Mult1_op_2 <= {24'd0 , Shift_Count_U[3]};
-//				
-//				Mult2_op_1 <= 32'sd159;
-//				Mult2_op_2 <= {24'd0 , Shift_Count_V[2]};
-				
-//				Mult3_op_1 <= -32'sd53281;
-//				Mult3_op_2 <= Final_VPrime_Even - 32'sd128;
-//				
-//				Mult4_op_1 <= -32'sd53281;
-//				Mult4_op_2 <= Final_VPrime_Odd - 32'sd128;
 				
 				data_counterU <= data_counterU + 1'b1;
 				data_counterV <= data_counterV + 1'b1;
