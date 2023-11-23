@@ -314,7 +314,7 @@ if (~Resetn) begin
 				Mult1_op_1 <= -32'sd52;
 				Mult1_op_2 <= Shift_Count_U[1];
 				
-				//(21*U)
+				//(21*V0)
 				Mult2_op_1 <= 32'sd21;
 				Mult2_op_2 <= {24'd0 , SRAM_read_data[15:8]};
 			
@@ -347,8 +347,8 @@ if (~Resetn) begin
 				Shift_Count_U[2] <= Shift_Count_U[0];
 				Shift_Count_U[3] <= Shift_Count_U[1];
 				
-				Shift_Count_U[1] <= SRAM_read_data[15:8];
-				Shift_Count_U[0] <= SRAM_read_data[7:0];
+				Shift_Count_U[1] <= SRAM_read_data[15:8]; //U2
+				Shift_Count_U[0] <= SRAM_read_data[7:0]; //U3
 				
 				M1State <= S_Lead_In6;
 				
@@ -373,8 +373,8 @@ if (~Resetn) begin
 				Shift_Count_V[2] <= Shift_Count_V[0];
 				Shift_Count_V[3] <= Shift_Count_V[1];
 				
-				Shift_Count_V[1] <= SRAM_read_data[15:8];
-				Shift_Count_V[0] <= SRAM_read_data[7:0];
+				Shift_Count_V[1] <= SRAM_read_data[15:8]; //V2
+				Shift_Count_V[0] <= SRAM_read_data[7:0]; //V3
 				
 				M1State <= S_Lead_In7;
 			
@@ -536,7 +536,7 @@ if (~Resetn) begin
 				Shift_Count_U[3] <= Shift_Count_U[2];
 				Shift_Count_U[4] <= Shift_Count_U[3];
 				Shift_Count_U[5] <= Shift_Count_U[4];
-				Shift_Count_U[0] <= SRAM_read_data[7:0];
+				Shift_Count_U[0] <= SRAM_read_data[15:8];
 				
 				M1State <= S_Lead_In13;
 			
@@ -573,7 +573,7 @@ if (~Resetn) begin
 				Shift_Count_V[3] <= Shift_Count_V[2];
 				Shift_Count_V[4] <= Shift_Count_V[3];
 				Shift_Count_V[5] <= Shift_Count_V[4];
-				Shift_Count_V[0] <= SRAM_read_data[7:0];
+				Shift_Count_V[0] <= SRAM_read_data[15:8];
 
 				
 				

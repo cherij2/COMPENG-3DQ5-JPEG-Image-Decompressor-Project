@@ -29,7 +29,7 @@ add your own.
 `define MAX_MISMATCHES 10
 
 
-
+/*
 //file for output
 // this is only useful if decoding is done all the way through
 `define OUTPUT_FILE_NAME "../data/motorcycle_tb.ppm"
@@ -38,13 +38,13 @@ add your own.
 `define VERIFICATION_FILE_NAME "../data/motorcycle.sram_d0"
 // input file for milestone 1
 `define INPUT_FILE_NAME "../data/motorcycle.sram_d1"
+*/
 
 
-/*
 `define VERIFICATION_FILE_NAME "../data/cat.sram_d0"
 `define OUTPUT_FILE_NAME "../data/cat_tb.ppm"
 `define INPUT_FILE_NAME "../data/cat.sram_d1"
-*/
+
 
 
 // input file for milestone 2
