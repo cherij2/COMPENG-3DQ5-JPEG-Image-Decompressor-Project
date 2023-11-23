@@ -58,9 +58,9 @@ typedef enum logic [6:0] {
 	S_Lead_In16,
 	S_Lead_In17,
 	S_CommonCase1,
-	S_CommonCase2,
-	S_CommonCase3,
-	S_CommonCase4,
+	S_CommonCase2, //19
+	S_CommonCase3, //20
+	S_CommonCase4, //21
 	S_CommonCase5,
 	S_CommonCase6,
 	S_CommonCase7,

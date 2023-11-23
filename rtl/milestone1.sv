@@ -284,12 +284,12 @@ if (~Resetn) begin
 				SRAM_address <= V_START_ADDRESS + data_counterV;
 				
 				//check later if 0 and 1 are in correct spots shift reg
-				Shift_Count_U[1] <= SRAM_read_data[7:0]; //0
-				Shift_Count_U[0] <= SRAM_read_data[15:8]; //1
+				Shift_Count_U[1] <= SRAM_read_data[15:8]; //0
+				Shift_Count_U[0] <= SRAM_read_data[7:0]; //1
 				
 				//(21*u0)
 				Mult1_op_1 <= 32'sd21;
-				Mult1_op_2 <= {24'd0 , SRAM_read_data[7:0]};
+				Mult1_op_2 <= {24'd0 , SRAM_read_data[15:8]};
 				
 				
 				//UOdd_Op[0] <= 32'd21 * SRAM_read_data[7:0];
@@ -307,8 +307,8 @@ if (~Resetn) begin
 				
 				
 				
-				Shift_Count_V[1] <= SRAM_read_data[7:0];
-				Shift_Count_V[0] <= SRAM_read_data[15:8];		
+				Shift_Count_V[1] <= SRAM_read_data[15:8];
+				Shift_Count_V[0] <= SRAM_read_data[7:0];		
 				
 				//(-52*U)
 				Mult1_op_1 <= -32'sd52;
@@ -316,7 +316,7 @@ if (~Resetn) begin
 				
 				//(21*U)
 				Mult2_op_1 <= 32'sd21;
-				Mult2_op_2 <= {24'd0 , SRAM_read_data[7:0]};
+				Mult2_op_2 <= {24'd0 , SRAM_read_data[15:8]};
 			
 				//UOdd_Op[1] <= 32'd52 * Shift_Count_U[1];
 				//VOdd_Op[0] <= 32'd21 * SRAM_read_data[7:0];
@@ -347,8 +347,8 @@ if (~Resetn) begin
 				Shift_Count_U[2] <= Shift_Count_U[0];
 				Shift_Count_U[3] <= Shift_Count_U[1];
 				
-				Shift_Count_U[1] <= SRAM_read_data[7:0];
-				Shift_Count_U[0] <= SRAM_read_data[15:8];
+				Shift_Count_U[1] <= SRAM_read_data[15:8];
+				Shift_Count_U[0] <= SRAM_read_data[7:0];
 				
 				M1State <= S_Lead_In6;
 				
@@ -373,8 +373,8 @@ if (~Resetn) begin
 				Shift_Count_V[2] <= Shift_Count_V[0];
 				Shift_Count_V[3] <= Shift_Count_V[1];
 				
-				Shift_Count_V[1] <= SRAM_read_data[7:0];
-				Shift_Count_V[0] <= SRAM_read_data[15:8];
+				Shift_Count_V[1] <= SRAM_read_data[15:8];
+				Shift_Count_V[0] <= SRAM_read_data[7:0];
 				
 				M1State <= S_Lead_In7;
 			
@@ -490,10 +490,10 @@ if (~Resetn) begin
 
 				
 				Mult1_op_1 <= 32'sd76284;
-				Mult1_op_2 <= {24'd0 , SRAM_read_data[7:0]} - 32'sd16; //Y0
+				Mult1_op_2 <= {24'd0 , SRAM_read_data[15:8]} - 32'sd16; //Y0
 				
 				Mult2_op_1 <= 32'sd76284;
-				Mult2_op_2 <= {24'd0 , SRAM_read_data[15:8]} - 32'sd16; //Y1
+				Mult2_op_2 <= {24'd0 , SRAM_read_data[7:0]} - 32'sd16; //Y1
 				
 				
 				Mult3_op_1 <= 32'sd104595;
