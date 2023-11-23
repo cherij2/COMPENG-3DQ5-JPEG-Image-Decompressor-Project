@@ -280,7 +280,7 @@ end
 // for this design we assume that the RGB data starts at location 0 in the external SRAM
 // if the memory layout is different, this value should be adjusted 
 // to match the starting address of the raw RGB data segment
-assign VGA_base_address = 18'd0;
+assign VGA_base_address = 18'd146944;
 
 // Give access to SRAM for UART and VGA at appropriate time
 //assign SRAM_address = (top_state == S_UART_RX) ? UART_SRAM_address : VGA_SRAM_address;

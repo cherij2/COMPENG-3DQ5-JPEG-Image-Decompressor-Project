@@ -23,6 +23,14 @@ add wave -bin UUT/SRAM_we_n
 add wave -hex UUT/SRAM_read_data
 
 add wave -divider -height 10 {M1 Signals}
+add wave -hex UUT/Milestone1/data_counterY
+add wave -hex UUT/Milestone1/Y_guys
+
+
+add wave -hex UUT/Milestone1/col_counter
+add wave -hex UUT/Milestone1/row_counter
+
+
 #add wave -bin UUT/VGA_unit/VGA_HSYNC_O
 #add wave -bin UUT/VGA_unit/VGA_VSYNC_O
 #add wave -uns UUT/VGA_unit/pixel_X_pos
