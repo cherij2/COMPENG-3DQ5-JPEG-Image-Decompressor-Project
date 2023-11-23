@@ -88,8 +88,7 @@ typedef enum logic [6:0] {
 	S_Lead_Out22,
 	S_Lead_Out23,
 	S_Lead_Out24,
-	S_Lead_Out25,
-	S_Lead_Out26
+	S_Lead_Out25
 	
 	
 } interp_csc_states;

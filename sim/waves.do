@@ -24,6 +24,10 @@ add wave -hex UUT/SRAM_read_data
 
 add wave -divider -height 10 {M1 Signals}
 add wave -hex UUT/Milestone1/data_counterY
+add wave -hex UUT/Milestone1/data_counterU
+
+add wave -hex UUT/Milestone1/data_counterV
+
 add wave -hex UUT/Milestone1/Y_guys
 
 

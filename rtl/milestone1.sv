@@ -1044,7 +1044,7 @@ if (~Resetn) begin
 				UPrime_Odd <= 32'd0;
 				VPrime_Odd <= 32'd0;
 				
-				if (col_counter == 8'd79) begin
+				if (col_counter == 8'd79 && even_odd_counter == 1'b0) begin
 					
 					// oddevencounter = 1, U159, col counter = 79
 					col_counter <= 8'd0;
@@ -1157,13 +1157,13 @@ if (~Resetn) begin
 				Mult4_op_1 <= -32'sd25624;
 				Mult4_op_2 <= Final_UPrime_Odd - 32'sd128;
 				
-				Shift_Count_U[0] <= SRAM_read_data[7:0];
 				Shift_Count_U[1] <= Shift_Count_U[0];
 				Shift_Count_U[2] <= Shift_Count_U[1];
 				Shift_Count_U[3] <= Shift_Count_U[2];
 				Shift_Count_U[4] <= Shift_Count_U[3];
 				Shift_Count_U[5] <= Shift_Count_U[4];
-				
+				Shift_Count_U[0] <= SRAM_read_data[7:0];
+
 				
 				M1State <= S_Lead_Out3;
 			
@@ -1198,12 +1198,12 @@ if (~Resetn) begin
 				Mult4_op_1 <= -32'sd53281;
 				Mult4_op_2 <= Final_VPrime_Odd - 32'sd128;
 				
-				Shift_Count_V[0] <= SRAM_read_data[7:0];	
 				Shift_Count_V[1] <= Shift_Count_V[0];
 				Shift_Count_V[2] <= Shift_Count_V[1];
 				Shift_Count_V[3] <= Shift_Count_V[2];
 				Shift_Count_V[4] <= Shift_Count_V[3];
 				Shift_Count_V[5] <= Shift_Count_V[4];
+				Shift_Count_V[0] <= SRAM_read_data[7:0];	
 				
 
 
@@ -1700,11 +1700,7 @@ if (~Resetn) begin
 				SRAM_write_data[15:8] <= G_Odd;
 				SRAM_write_data[7:0] <= B_Odd;
 				
-//				Mult1_op_1 <= 32'sd159;
-//				Mult1_op_2 <= {24'd0 , Shift_Count_U[3]};
-//				
-//				Mult2_op_1 <= 32'sd159;
-//				Mult2_op_2 <= {24'd0 , Shift_Count_V[2]};
+
 				
 				Mult3_op_1 <= -32'sd53281;
 				Mult3_op_2 <= Final_VPrime_Even - 32'sd128;
@@ -1712,12 +1708,7 @@ if (~Resetn) begin
 				Mult4_op_1 <= -32'sd53281;
 				Mult4_op_2 <= Final_VPrime_Odd - 32'sd128;
 				
-//				Shift_Count_V[0] <= SRAM_read_data[7:0];	
-//				Shift_Count_V[1] <= Shift_Count_V[0];
-//				Shift_Count_V[2] <= Shift_Count_V[1];
-//				Shift_Count_V[3] <= Shift_Count_V[2];
-//				Shift_Count_V[4] <= Shift_Count_V[3];
-//				Shift_Count_V[5] <= Shift_Count_V[4];
+
 				
 				M1State <= S_Lead_Out18;
 			
@@ -1732,19 +1723,7 @@ if (~Resetn) begin
 				G_Odd_buf <= G_Odd_buf + Mult_result4;
 				G_Even_buf <= G_Even_buf + Mult_result3;
 				
-				
-				
-				//data_counterRGB <= data_counterRGB + 1'b1;
-				//rgb data count should go up everytime we write
-				
-				
-				
-//				Mult1_op_1 <= 32'sd159;
-//				Mult1_op_2 <= {24'd0 , Shift_Count_U[2]};
-//				
-//				Mult2_op_1 <= 32'sd159;
-//				Mult2_op_2 <= {24'd0 , Shift_Count_V[2]};
-//			
+						
 				Mult3_op_1 <= 32'sd132251;
 				Mult3_op_2 <= Final_UPrime_Even - 32'sd128;
 				
@@ -1756,25 +1735,16 @@ if (~Resetn) begin
 			end
 			S_Lead_Out19: begin
 				
-				//Back to read
+			
 //				SRAM_we_n <= 1'b1;
 //				SRAM_address <= Y_START_ADDRESS + data_counterY;
 //				data_counterY <= data_counterY + 1'b1;
 				
-				
-//				UPrime_Odd <= UPrime_Odd + Mult_result1;
-//				VPrime_Odd <= VPrime_Odd + Mult_result2;
 			
 				B_Odd_buf <= B_Odd_buf + Mult_result4;
 				B_Even_buf <= B_Even_buf + Mult_result3;
 				
 				
-			
-//				Mult1_op_1 <= -32'sd52;
-//				Mult1_op_2 <= {24'd0 , Shift_Count_U[1]};
-//				
-//				Mult2_op_1 <= -32'sd52;
-//				Mult2_op_2 <= {24'd0 , Shift_Count_V[1]};
 
 				M1State <= S_Lead_Out20;
 			
@@ -1783,25 +1753,7 @@ if (~Resetn) begin
 				
 //				SRAM_we_n <= 1'b1;
 //				SRAM_address <= U_START_ADDRESS + data_counterU;
-			
-//				UPrime_Odd <= UPrime_Odd + Mult_result1;
-//				VPrime_Odd <= VPrime_Odd + Mult_result2;
-				
-				//if the even odd counter indicates ODD that means we have
-				// gone thru once alr at this UV address so read ODD value
-
-				
-//				Mult1_op_1 <= 32'sd21;
-//				Mult1_op_2 <= {24'd0 , Shift_Count_U[0]};
-//				
-//				Mult2_op_1 <= 32'sd21;
-//				Mult2_op_2 <= {24'd0 , Shift_Count_V[0]};
-//				
-//				Mult3_op_1 <= 32'sd21;
-//				Mult3_op_2 <= {24'd0 , Shift_Count_U[5]};
-//				
-//				Mult4_op_1 <= 32'sd21;
-//				Mult4_op_2 <= {24'd0 , Shift_Count_V[5]};
+		
 				
 				R_Even_buf2 <= R_Even_buf;
 				R_Odd_buf2 <= R_Odd_buf;
@@ -1838,15 +1790,6 @@ if (~Resetn) begin
 				// oddevencounter = 0(updated in commoncase1), U158, col counter = 79
 				
 				
-//				Final_UPrime_Even <= Shift_Count_U[3];
-//				Final_VPrime_Even <= Shift_Count_V[3];
-//				
-//				Final_UPrime_Odd <= (Mult_result1 + Mult_result3 + UPrime_Odd + 32'sd128) >>> 8;
-//				Final_VPrime_Odd <= (Mult_result2 + Mult_result4 + VPrime_Odd + 32'sd128) >>> 8;
-				
-//				UPrime_Odd <= 32'd0;
-//				VPrime_Odd <= 32'd0;
-				
 				M1State <= S_Lead_Out22;
 			
 			end
@@ -1857,29 +1800,13 @@ if (~Resetn) begin
 				data_counterRGB <= data_counterRGB + 1'b1;
 				//rgb data count should go up everytime we write A PAIR OF RGB VALUES
 				
-				
-				//from leadin case we go from U4 -> U5
-				//counter goes from 0 -> 1
-//				even_odd_counter <= ~even_odd_counter; 
-				//even odd counter goes to 1 so next 6 CC the UV address
-				// will not update because we need to stay at UV(6,7) for
-				// two reads
+
 				
 				//WRITE STATE
 				SRAM_write_data[15:8] <= R_Even;
 				SRAM_write_data[7:0] <= G_Even;
 				
-//				Mult1_op_1 <= 32'sd76284;
-//				Mult1_op_2 <= {24'd0 , SRAM_read_data[15:8]} - 32'sd16; //Y0
-//				
-//				Mult2_op_1 <= 32'sd76284;
-//				Mult2_op_2 <= {24'd0 , SRAM_read_data[7:0]} - 32'sd16; //Y1
-//				
-//				Mult3_op_1 <= 32'sd104595;
-//				Mult3_op_2 <= Final_VPrime_Even - 32'sd128;
-//				
-//				Mult4_op_1 <= 32'sd104595;
-//				Mult4_op_2 <= Final_VPrime_Odd - 32'sd128;
+
 				M1State <= S_Lead_Out23;
 			
 			end
@@ -1890,37 +1817,10 @@ if (~Resetn) begin
 				data_counterRGB <= data_counterRGB + 1'b1;
 				//rgb data count should go up everytime we write A PAIR OF RGB VALUES
 				
-//				R_Odd_buf <= Mult_result2 + Mult_result4;
-//				G_Odd_buf <= Mult_result2;
-//				B_Odd_buf <= Mult_result2;
-//				
-//				R_Even_buf <= Mult_result1 + Mult_result3;
-//				G_Even_buf <= Mult_result1;
-//				B_Even_buf <= Mult_result1;
 				
 				//WRITE STATE
 				SRAM_write_data[15:8] <= B_Even;
 				SRAM_write_data[7:0] <= R_Odd;
-				
-//				Mult1_op_1 <= -32'sd52;
-//				Mult1_op_2 <= {24'd0 , Shift_Count_U[3]};
-//				
-//				Mult2_op_1 <= -32'sd52;
-//				Mult2_op_2 <= {24'd0 , Shift_Count_V[3]};
-				
-//				Mult3_op_1 <= -32'sd25624;
-//				Mult3_op_2 <= Final_UPrime_Even - 32'sd128;
-//				
-//				Mult4_op_1 <= -32'sd25624;
-//				Mult4_op_2 <= Final_UPrime_Odd - 32'sd128;
-				
-//				Shift_Count_U[0] <= SRAM_read_data[7:0];
-//				Shift_Count_U[1] <= Shift_Count_U[0];
-//				Shift_Count_U[2] <= Shift_Count_U[1];
-//				Shift_Count_U[3] <= Shift_Count_U[2];
-//				Shift_Count_U[4] <= Shift_Count_U[3];
-//				Shift_Count_U[5] <= Shift_Count_U[4];
-				
 				
 				
 				M1State <= S_Lead_Out24;
@@ -1928,9 +1828,7 @@ if (~Resetn) begin
 			end
 			S_Lead_Out24: begin
 				
-//				G_Odd_buf <= G_Odd_buf + Mult_result4;
-//				G_Even_buf <= G_Even_buf + Mult_result3;
-				
+
 				//WRITE STATE
 				SRAM_we_n <= 1'b0;
 				SRAM_address <= RGB_START_ADDRESS + data_counterRGB;
@@ -1940,19 +1838,6 @@ if (~Resetn) begin
 				
 				SRAM_write_data[15:8] <= G_Odd;
 				SRAM_write_data[7:0] <= B_Odd;
-				
-				//NO LONGER DOING INTERPOLATION, SHIFT COUNTER DONT MATTER
-//				Mult1_op_1 <= 32'sd159;
-//				Mult1_op_2 <= {24'd0 , Shift_Count_U[3]};
-//				
-//				Mult2_op_1 <= 32'sd159;
-//				Mult2_op_2 <= {24'd0 , Shift_Count_V[2]};
-				
-//				Mult3_op_1 <= -32'sd53281;
-//				Mult3_op_2 <= Final_VPrime_Even - 32'sd128;
-//				
-//				Mult4_op_1 <= -32'sd53281;
-//				Mult4_op_2 <= Final_VPrime_Odd - 32'sd128;
 				
 				//to indicate what row we are on
 				row_counter <= row_counter + 8'd1;
@@ -1990,56 +1875,7 @@ if (~Resetn) begin
 			
 			end
 			
-			/*
-			S_Lead_Out26: begin
-				
-				//FINISH WRITING STATE
-				
-				SRAM_we_n <= 1'b1;
-				M1State <= S_M1_IDLE;
-				
 			
-			end
-			
-			
-			
-			
-			
-			
-			
-			
-			
-			
-		
-		/*
-			
-			USE BELOW FOR WHEN CHOOSING WHICH UV DATA TO READ (ODD OR EVEN)
-		
-				if (even_odd_counter % 2 == 0) begin
-				
-					Shift_Count_U[0] <= SRAM_read_data[7:0];
-					
-				end else begin
-				
-					Shift_Count_U[0] <= SRAM_read_data[15:0];	
-					
-				end
-		
-		
-			USE BELOW FOR WHEN CHOOSING TO INCREASE UV COUNTERS
-			
-				if (even_odd_counter % 2 == 0) begin
-					
-					data_counterU <= data_counterU;
-				
-				end else begin
-				
-					data_counterU <= data_counterU + 1'b1;
-									
-				end
-		
-		*/
-		
 		endcase
 	end
 end
