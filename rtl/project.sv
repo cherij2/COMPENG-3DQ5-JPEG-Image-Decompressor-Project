@@ -212,6 +212,7 @@ always @(posedge CLOCK_50_I or negedge resetn) begin
 		UART_timer <= 26'd0;
 		
 		VGA_enable <= 1'b1;
+		M1_Enable <= 1'b0;
 	
 	end else begin
 
