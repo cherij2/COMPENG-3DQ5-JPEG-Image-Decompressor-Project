@@ -89,6 +89,7 @@ logic [31:0] B_Odd_buf2;
 
 
 //Instantiate 4 Multipliers
+//same as m1
 logic [31:0] Mult1_op_1, Mult1_op_2, Mult2_op_1, Mult2_op_2, Mult3_op_1, Mult3_op_2, Mult4_op_1, Mult4_op_2;
 logic [63:0] Mult_result_long1, Mult_result_long2, Mult_result_long3, Mult_result_long4;
 logic [31:0] Mult_result1, Mult_result2, Mult_result3, Mult_result4;

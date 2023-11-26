@@ -100,18 +100,18 @@ typedef enum logic [6:0] {
 	
 	S_M2_IDLE,
 	
-	S'_Read_Lead_In1,
-	S'_Read_Lead_In2,
-	S'_Read_Lead_In3,
-	S'_Read_CommonCase1,
-	S'_Read_CommonCase2, //19
-	S'_Read_CommonCase3, //20
-	S'_Read_CommonCase4, //21
-	S'_Read_CommonCase5,
-	S'_Read_CommonCase6,
-	S'_Read_CommonCase7,
-	S'_Read_CommonCase8,
-	S'_Read_Lead_Out1,
+	S_Read_Lead_In1,
+	S_Read_Lead_In2,
+	S_Read_Lead_In3,
+	S_Read_CommonCase1,
+	S_Read_CommonCase2, //19
+	S_Read_CommonCase3, //20
+	S_Read_CommonCase4, //21
+	S_Read_CommonCase5,
+	S_Read_CommonCase6,
+	S_Read_CommonCase7,
+	S_Read_CommonCase8,
+	S_Read_Lead_Out1,
 	
 	T_Calc_Lead_In1,
 	T_Calc_CommonCase1,
@@ -130,6 +130,7 @@ typedef enum logic [6:0] {
 	T_Calc_CommonCase14,
 	T_Calc_CommonCase15,
 	T_Calc_CommonCase16,
+	T_Calc_CommonCase17,
 	T_Calc_Lead_Out1,
 	
 	S_Calc_Lead_In1,
