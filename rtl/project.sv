@@ -81,6 +81,17 @@ logic [17:0] M1_SRAM_address;
 logic [15:0] M1_SRAM_write_data;
 logic M1_SRAM_we_n;
 
+logic [17:0] M2_SRAM_address;
+logic [15:0] M2_SRAM_write_data;
+logic M2_SRAM_we_n;
+
+//PLAG
+logic M1_Stop;
+logic M1_Enable;
+
+logic M2_Stop;
+logic M2_Enable;
+
 // For SRAM
 logic [17:0] SRAM_address;
 logic [15:0] SRAM_write_data;
@@ -98,10 +109,7 @@ logic [25:0] UART_timer;
 
 logic [6:0] value_7_segment [7:0];
 
-//PLAG
 
-logic M1_Stop;
-logic M1_Enable;
 
 // For error detection in UART
 logic Frame_error;
@@ -196,6 +204,28 @@ milestone1 Milestone1 (
 	
 );
 
+milestone2 Milestone2 (
+
+	.Clock(CLOCK_50_I),
+	
+	.Resetn(~SWITCH_I[17]),
+	
+	.SRAM_read_data(SRAM_read_data),	
+	
+	.SRAM_address(M2_SRAM_address),
+	
+	.SRAM_write_data(M2_SRAM_write_data),
+	
+	.SRAM_we_n(M2_SRAM_we_n),
+	
+	.M1_Stop(M2_Stop),
+	
+	.M1_Enable(M2_Enable),
+	
+	
+	
+);
+
 assign SRAM_ADDRESS_O[19:18] = 2'b00;
 
 
@@ -221,6 +251,8 @@ always @(posedge CLOCK_50_I or negedge resetn) begin
 		UART_timer <= UART_timer + 26'd1;
 
 		case (top_state)
+		
+		//add implementation to go from m1 -> m2
 		S_IDLE: begin
 			VGA_enable <= 1'b1;  
 			if (~UART_RX_I) begin
@@ -304,6 +336,14 @@ always_comb begin
 			SRAM_write_data = M1_SRAM_write_data; 
 			SRAM_we_n =  M1_SRAM_we_n;
 		end
+		
+		
+		S_M2: begin 
+			SRAM_address = M2_SRAM_address; 
+			SRAM_write_data = M2_SRAM_write_data; 
+			SRAM_we_n =  M2_SRAM_we_n;
+		end
+		
 		
 		default: begin 
 			

@@ -4,7 +4,8 @@
 typedef enum logic [1:0] {
 	S_IDLE,
 	S_UART_RX,
-	S_M1
+	S_M1,
+	S_M2
 } top_state_type;
 
 typedef enum logic [1:0] {
@@ -37,6 +38,7 @@ typedef enum logic [3:0] {
 	S_VS_FETCH_PIXEL_DATA_3
 } VGA_SRAM_state_type;
 
+//MILESTONE 1
 typedef enum logic [6:0] {
 	
 	S_M1_IDLE,
@@ -93,11 +95,83 @@ typedef enum logic [6:0] {
 	
 } interp_csc_states;
 
+//MILESTONE 2
+typedef enum logic [6:0] {
+	
+	S_M2_IDLE,
+	
+	S'_Read_Lead_In1,
+	S'_Read_Lead_In2,
+	S'_Read_Lead_In3,
+	S'_Read_CommonCase1,
+	S'_Read_CommonCase2, //19
+	S'_Read_CommonCase3, //20
+	S'_Read_CommonCase4, //21
+	S'_Read_CommonCase5,
+	S'_Read_CommonCase6,
+	S'_Read_CommonCase7,
+	S'_Read_CommonCase8,
+	S'_Read_Lead_Out1,
+	
+	T_Calc_Lead_In1,
+	T_Calc_CommonCase1,
+	T_Calc_CommonCase2,
+	T_Calc_CommonCase3,
+	T_Calc_CommonCase4,
+	T_Calc_CommonCase5,
+	T_Calc_CommonCase6,
+	T_Calc_CommonCase7,
+	T_Calc_CommonCase8,
+	T_Calc_CommonCase9,
+	T_Calc_CommonCase10,
+	T_Calc_CommonCase11,
+	T_Calc_CommonCase12,
+	T_Calc_CommonCase13,
+	T_Calc_CommonCase14,
+	T_Calc_CommonCase15,
+	T_Calc_CommonCase16,
+	T_Calc_Lead_Out1,
+	
+	S_Calc_Lead_In1,
+	S_Calc_CommonCase1,
+	S_Calc_CommonCase2,
+	S_Calc_CommonCase3,
+	S_Calc_CommonCase4,
+	S_Calc_CommonCase5,
+	S_Calc_CommonCase6,
+	S_Calc_CommonCase7,
+	S_Calc_CommonCase8,
+	S_Calc_CommonCase9,
+	S_Calc_CommonCase10,
+	S_Calc_CommonCase11,
+	S_Calc_CommonCase12,
+	S_Calc_CommonCase13,
+	S_Calc_CommonCase14,
+	S_Calc_CommonCase15,
+	S_Calc_CommonCase16,
+	S_Calc_Lead_Out1,
+	
+	
+	
+	
+	
+	S_Lead_In1,
+	
+	
+} inv_cos_states;
+
+
 parameter
 	Y_START_ADDRESS = 18'd0,
 	U_START_ADDRESS = 18'd38400,
 	V_START_ADDRESS = 18'd57600,
-	RGB_START_ADDRESS = 18'd146944;
+	RGB_START_ADDRESS = 18'd146944,
+	
+	Y_START_ADDRESS = 18'd76800,
+	U_START_ADDRESS = 18'd153600, 
+	V_START_ADDRESS = 18'd192000;
+
+	
 
 parameter 
    VIEW_AREA_LEFT = 160,
