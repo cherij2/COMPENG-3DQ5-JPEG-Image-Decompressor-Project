@@ -57,7 +57,7 @@ logic even_odd_counter;
 logic [7:0] row_counter; //needs to go up to 240
 logic [8:0] col_counter; //needs to go up to 320
 
-logic [17:0] Y_guys;
+	logic [17:0] data_counterY2;// previously Y_guys
 
 logic [31:0] R_Even;
 logic [31:0] G_Even;
@@ -249,7 +249,7 @@ if (~Resetn) begin
 					
 					even_odd_counter <= 1'b0;
 					
-					Y_guys <= 18'd0;
+					data_counterY2 <= 18'd0;
 					
 					M1State <= S_Lead_In1;
 				end
@@ -408,7 +408,7 @@ if (~Resetn) begin
 				SRAM_we_n <= 1'b1;
 				SRAM_address <= Y_START_ADDRESS + data_counterY;
 				data_counterY <= data_counterY + 1'b1;
-				Y_guys <= Y_guys + 1'b1;
+				data_counterY2 <= data_counterY2 + 1'b1;
 
 				
 			
@@ -622,7 +622,7 @@ if (~Resetn) begin
 				SRAM_we_n <= 1'b1;
 				SRAM_address <= Y_START_ADDRESS + data_counterY;
 				data_counterY <= data_counterY + 1'b1;
-				Y_guys <= Y_guys + 1'b1;
+				data_counterY2 <= data_counterY2 + 1'b1;
 
 				
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
@@ -928,7 +928,7 @@ if (~Resetn) begin
 				SRAM_we_n <= 1'b1;
 				SRAM_address <= Y_START_ADDRESS + data_counterY;
 				data_counterY <= data_counterY + 1'b1;
-				Y_guys <= Y_guys + 1'b1;
+				data_counterY2 <= data_counterY2 + 1'b1;
 
 				if (even_odd_counter == 0) begin
 					
@@ -1254,7 +1254,7 @@ if (~Resetn) begin
 				SRAM_we_n <= 1'b1;
 				SRAM_address <= Y_START_ADDRESS + data_counterY;
 				data_counterY <= data_counterY + 1'b1;
-				Y_guys <= Y_guys + 1'b1;
+				data_counterY2 <= data_counterY2 + 1'b1;
 
 				
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
@@ -1349,7 +1349,7 @@ if (~Resetn) begin
 				
 				//add some counter so that the number of times loop repeasts is < 3
 				//if < 3, go to S_Lead_Out1, otherwise S_Lead_Out8
-				if (Y_guys == 16'd159) begin
+				if (data_counterY2 == 16'd159) begin
 					M1State <= S_Lead_Out8;
 				end
 				
@@ -1515,7 +1515,7 @@ if (~Resetn) begin
 				SRAM_we_n <= 1'b1;
 				SRAM_address <= Y_START_ADDRESS + data_counterY;
 				data_counterY <= data_counterY + 1'b1;
-				Y_guys <= Y_guys + 1'b1;
+				data_counterY2 <= data_counterY2 + 1'b1;
 
 				
 				UPrime_Odd <= UPrime_Odd + Mult_result1;
