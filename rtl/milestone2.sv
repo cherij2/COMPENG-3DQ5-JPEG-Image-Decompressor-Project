@@ -408,7 +408,18 @@ always_comb begin
 			end
 	endcase
 
-
+	case(YUV_counter_read2)// 0=Y, 1=U, 2=V
+			2'd0: begin
+				start_offset2 <= S_Y_START_ADDRESS; 
+			end
+			2'd1: begin
+				start_offset2 <= S_U_START_ADDRESS; 
+			end
+			2'd2: begin
+				start_offset2 <= S_V_START_ADDRESS; 
+			end
+	endcase
+	
 end
 
 
@@ -1103,12 +1114,122 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 		
 		
 		
-	T_Calc_CommonCase1,
-		
-		
-		
-		
-	
+	//T_Calc_CommonCase1,
+
+
+		S_Write_LeadIn1: begin
+
+			address_5 <= 7'b0; //Make sure write enable is set for DRAM previously
+			SRAM_we_n <= 1'b0;
+			SW_data_counterY <= 16'b0;
+
+			M2State <= S_Write_LeadIn2;
+
+		end
+
+		S_Write_LeadIn2: begin
+
+			SRAM_address <= Y_START_ADDRESS;
+			SW_data_counterY <= SW_data_counterY + 1'b1;
+			hooplaYcount <= hooplaYcount + 1'b1;
+
+			row_counter <= 16'b0;
+			
+
+			M2State <= S_Write_CommonCase1;
+
+		end
+
+		S_Write_CommonCase1: begin
+
+			SRAM_write_data[15:8] <= read_data_a[2][7:0]; //s0
+			SRAM_write_data[7:0] <= read_data_a[2][15:8]; //s1
+
+			SRAM_address <= Y_START_ADDRESS + SW_data_counterY;
+			SW_data_counterY <= SW_data_counterY + 1'b1;
+			hooplaYcount <= hooplaYcount + 1'b1;
+
+			address_5 <= address_5 + 1'b1; //DRAM data available 2cc from this
+
+			M2State <= S_Write_CommonCase2;
+
+		end
+
+		S_Write_CommonCase2: begin
+
+			SRAM_write_data[15:8] <= read_data_a[2][23:16]; //s2
+			SRAM_write_data[7:0] <= read_data_a[2][31:24]; //s3
+
+			SRAM_address <= Y_START_ADDRESS + SW_data_counterY;
+			SW_data_counterY <= SW_data_counterY + 1'b1;
+			hooplaYcount <= hooplaYcount + 1'b1;
+
+			
+
+			M2State <= S_Write_CommonCase3;
+
+		end
+
+		S_Write_CommonCase3: begin
+
+			SRAM_write_data[15:8] <= read_data_a[2][7:0]; //s4
+			SRAM_write_data[7:0] <= read_data_a[2][15:8]; //s5
+
+			SRAM_address <= Y_START_ADDRESS + SW_data_counterY;
+			SW_data_counterY <= SW_data_counterY + 1'b1;
+			hooplaYcount <= hooplaYcount + 1'b1;
+
+			address_5 <= address_5 + 1'b1; //DRAM data available 2cc from this
+
+			M2State <= S_Write_CommonCase4;
+
+
+		end
+
+		S_Write_CommonCase4: begin
+
+			SRAM_write_data[15:8] <= read_data_a[2][23:16]; //s6
+			SRAM_write_data[7:0] <= read_data_a[2][31:24]; //s7
+
+			SRAM_address <= Y_START_ADDRESS + SW_data_counterY;
+			SW_data_counterY <= SW_data_counterY + 1'b1;
+			hooplaYcount <= hooplaYcount + 1'b1;
+
+
+			if (hooplaYcount == 7) begin
+
+					row_counter <= row_counter + 1'b1;
+					hooplaYcount <= 16'b0;
+
+			end
+			
+			if (row_counter == 7 && hooplaYcount == 7) begin 
+				M2State <= S_Write_LeadOut1;
+			end else begin
+				M2State <= S_Write_CommonCase1;
+			end
+
+		end
+
+		S_Write_LeadOut1: begin
+
+			M2State <= S_Write_LeadOut2;
+
+		end
+
+		S_Write_LeadOut2: begin
+
+			M2State <= S_Write_LeadOut3;
+
+		end
+
+		S_Write_LeadOut3: begin
+
+			M2_Stop <= 1'b1;
+			M2State <= S_M2_IDLE;			
+
+		end
+
 		
 		
 		endcase
