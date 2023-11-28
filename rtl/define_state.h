@@ -1,14 +1,14 @@
 `ifndef DEFINE_STATE
 
 // for top state - we have more states than needed
-typedef enum logic [1:0] {
+typedef enum logic [2:0] {
 	S_IDLE,
 	S_UART_RX,
 	S_M1,
 	S_M2
 } top_state_type;
 
-typedef enum logic [1:0] {
+typedef enum logic [2:0] {
 	S_RXC_IDLE,
 	S_RXC_SYNC,
 	S_RXC_ASSEMBLE_DATA,
@@ -25,7 +25,7 @@ typedef enum logic [2:0] {
 	S_US_WRITE_SECOND_BYTE
 } UART_SRAM_state_type;
 
-typedef enum logic [3:0] {
+typedef enum logic [4:0] {
 	S_VS_WAIT_NEW_PIXEL_ROW,
 	S_VS_NEW_PIXEL_ROW_DELAY_1,
 	S_VS_NEW_PIXEL_ROW_DELAY_2,
@@ -168,9 +168,9 @@ parameter
 	V_START_ADDRESS = 18'd57600,
 	RGB_START_ADDRESS = 18'd146944,
 	
-	Y_START_ADDRESS = 18'd76800,
-	U_START_ADDRESS = 18'd153600, 
-	V_START_ADDRESS = 18'd192000;
+	Y_START_ADDRESS_M2 = 18'd76800,
+	U_START_ADDRESS_M2 = 18'd153600, 
+	V_START_ADDRESS_M2 = 18'd192000;
 
 	
 

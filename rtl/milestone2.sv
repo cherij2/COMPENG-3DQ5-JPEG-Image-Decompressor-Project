@@ -26,9 +26,11 @@ module milestone2 (
 
 
 logic [6:0] address_1, address_2, address_3, address_4, address_5, address_6;
-logic [6:0] address_1_counter, address_2_counter, address_3_counter, address_4_counter, address_5_counter, address_6_counter;
+// logic [6:0] address_1_counter, address_2_counter, address_3_counter, address_4_counter, address_5_counter, address_6_counter;
 logic [31:0] write_data_b [2:0];
+logic [31:0] write_data_a [2:0];
 logic write_enable_b [2:0];
+logic write_enable_a [2:0];
 logic [31:0] read_data_a [2:0];
 logic [31:0] read_data_b [2:0];
 
@@ -87,13 +89,22 @@ logic [17:0] start_offset; // changes based on if we are reading y/u/v
 logic [15:0] S_prime_buffer;
 
 
+
 logic [15:0] S_prime_counter [3:0]; // to read the same 4 S prime slots for calc T
 logic [31:0] T_accumulator;
 
 logic [7:0] coeff [3:0];
-logic [4:0] T_col_counter;
+logic [4:0] T_col_counter; //i dont think we need this
 logic [4:0] T_row_counter;
 
+
+
+logic [15:0] S_S_counter [7:0]; // to read the same 2 T slots for calc S
+logic [15:0] S_T_counter [7:0]; // to write to the same 2 slots for in S DRAM
+
+logic [31:0] S_accumulator[1:0];
+logic [4:0] S_col_counter;
+logic [4:0] S_four_counter;
 
 
 
@@ -130,269 +141,46 @@ always_comb begin
 	//how do you put a coefficient table into an embedded RAM??????
 	//pleaseeeeeee telll meeeeeeeeeeeeeeee............
 	// i hate this
-	case (coeff[0])
-		0:   C0 = 32'sd1448;   
-		1:   C0 = 32'sd1448;   
-		2:   C0 = 32'sd1448;   
-		3:   C0 = 32'sd1448;   
-		4:   C0 = 32'sd1448;   
-		5:   C0 = 32'sd1448;   
-		6:   C0 = 32'sd1448;   
-		7:   C0 = 32'sd1448;   
-		8:   C0 = 32'sd2008;   
-		9:   C0 = 32'sd1702;   
-		10:  C0 = 32'sd1137;   
-		11:  C0 = 32'sd399;    
-		12:  C0 = -32'sd399;   
-		13:  C0 = -32'sd1137;  
-		14:  C0 = -32'sd1702;  
-		15:  C0 = -32'sd2008;  
-		16:  C0 = 32'sd1892;   
-		17:  C0 = 32'sd783;    
-		18:  C0 = -32'sd783;   
-		19:  C0 = -32'sd1892;  
-		20:  C0 = -32'sd1892;  
-		21:  C0 = -32'sd783;   
-		22:  C0 = 32'sd783;    
-		23:  C0 = 32'sd1892;   
-		24:  C0 = 32'sd1702;   
-		25:  C0 = -32'sd399;   
-		26:  C0 = -32'sd2008;  
-		27:  C0 = -32'sd1137;  
-		28:  C0 = 32'sd1137;   
-		29:  C0 = 32'sd2008;   
-		30:  C0 = 32'sd399;    
-		31:  C0 = -32'sd1702;  
-		32:  C0 = 32'sd1448;   
-		33:  C0 = -32'sd1448;  
-		34:  C0 = -32'sd1448;  
-		35:  C0 = 32'sd1448;   
-		36:  C0 = 32'sd1448;   
-		37:  C0 = -32'sd1448;  
-		38:  C0 = -32'sd1448;  
-		39:  C0 = 32'sd1448;   
-		40:  C0 = 32'sd1137;   
-		41:  C0 = -32'sd2008;  
-		42:  C0 = 32'sd399;    
-		43:  C0 = 32'sd1702;   
-		44:  C0 = -32'sd1702;  
-		45:  C0 = -32'sd399;   
-		46:  C0 = 32'sd2008;   
-		47:  C0 = -32'sd1137;  
-		48:  C0 = 32'sd783;    
-		49:  C0 = -32'sd1892;  
-		50:  C0 = 32'sd1892;   
-		51:  C0 = -32'sd783;   
-		52:  C0 = -32'sd783;   
-		53:  C0 = 32'sd1892;   
-		54:  C0 = -32'sd1892;  
-		55:  C0 = 32'sd783;   
-		56:  C0 = 32'sd399;    
-		57:  C0 = -32'sd1137;  
-		58:  C0 = 32'sd1702;   
-		59:  C0 = -32'sd2008;  
-		60:  C0 = 32'sd2008;  
-		61:  C0 = -32'sd1702;  
-		62:  C0 = 32'sd1137;  
-		63:  C0 = -32'sd399;   
+	//LUT HELL :(((
+	case (coeff[0])//sorted into rows
+		0:C0=32'sd1448;	1:C0=32'sd1448;	2:C0=32'sd1448;	3:C0=32'sd1448;	4:C0=32'sd1448; 5:C0=32'sd1448; 6:C0=32'sd1448; 7:   C0=32'sd1448;   
+		8:   C0=32'sd2008; 9:C0=32'sd1702; 10:C0=32'sd1137; 11: C0=32'sd399; 12: C0=-32'sd399; 13:  C0=-32'sd1137; 14:C0=-32'sd1702; 15:C0=-32'sd2008;
+		16:  C0 = 32'sd1892; 17:  C0 = 32'sd783; 18:  C0 = -32'sd783; 19:  C0 = -32'sd1892; 20:  C0 = -32'sd1892; 21:  C0 = -32'sd783; 22:  C0 = 32'sd783; 23:  C0 = 32'sd1892;   
+		24:  C0 = 32'sd1702; 25:  C0 = -32'sd399; 26:  C0 = -32'sd2008; 27:  C0 = -32'sd1137; 28:  C0 = 32'sd1137; 29:  C0 = 32'sd2008; 30:  C0 = 32'sd399; 31:  C0 = -32'sd1702; 
+		32:  C0 = 32'sd1448; 33:  C0 = -32'sd1448; 34:  C0 = -32'sd1448; 35:  C0 = 32'sd1448;   36:  C0 = 32'sd1448; 37:  C0 = -32'sd1448; 38:  C0 = -32'sd1448; 39:  C0 = 32'sd1448; 
+		40:  C0 = 32'sd1137; 41:  C0 = -32'sd2008; 42:  C0 = 32'sd399; 43:  C0 = 32'sd1702; 44:  C0 = -32'sd1702; 45:  C0 = -32'sd399; 46:  C0 = 32'sd2008; 47:  C0 = -32'sd1137;  
+		48:  C0 = 32'sd783; 49:  C0 = -32'sd1892; 50:  C0 = 32'sd1892; 51:  C0 = -32'sd783; 52:  C0 = -32'sd783; 53:  C0 = 32'sd1892; 54:  C0 = -32'sd1892; 55:  C0 = 32'sd783;   
+		56:  C0 = 32'sd399; 57:  C0 = -32'sd1137; 58:  C0 = 32'sd1702; 59:  C0 = -32'sd2008; 60:  C0 = 32'sd2008; 61:  C0 = -32'sd1702; 62:  C0 = 32'sd1137; 63:  C0 = -32'sd399;   
 	endcase
 	case (coeff[1])
-		0:   C0 = 32'sd1448;   
-		1:   C0 = 32'sd1448;   
-		2:   C0 = 32'sd1448;   
-		3:   C0 = 32'sd1448;   
-		4:   C0 = 32'sd1448;   
-		5:   C0 = 32'sd1448;   
-		6:   C0 = 32'sd1448;   
-		7:   C0 = 32'sd1448;   
-		8:   C0 = 32'sd2008;   
-		9:   C0 = 32'sd1702;   
-		10:  C0 = 32'sd1137;   
-		11:  C0 = 32'sd399;    
-		12:  C0 = -32'sd399;   
-		13:  C0 = -32'sd1137;  
-		14:  C0 = -32'sd1702;  
-		15:  C0 = -32'sd2008;  
-		16:  C0 = 32'sd1892;   
-		17:  C0 = 32'sd783;    
-		18:  C0 = -32'sd783;   
-		19:  C0 = -32'sd1892;  
-		20:  C0 = -32'sd1892;  
-		21:  C0 = -32'sd783;   
-		22:  C0 = 32'sd783;    
-		23:  C0 = 32'sd1892;   
-		24:  C0 = 32'sd1702;   
-		25:  C0 = -32'sd399;   
-		26:  C0 = -32'sd2008;  
-		27:  C0 = -32'sd1137;  
-		28:  C0 = 32'sd1137;   
-		29:  C0 = 32'sd2008;   
-		30:  C0 = 32'sd399;    
-		31:  C0 = -32'sd1702;  
-		32:  C0 = 32'sd1448;   
-		33:  C0 = -32'sd1448;  
-		34:  C0 = -32'sd1448;  
-		35:  C0 = 32'sd1448;   
-		36:  C0 = 32'sd1448;   
-		37:  C0 = -32'sd1448;  
-		38:  C0 = -32'sd1448;  
-		39:  C0 = 32'sd1448;   
-		40:  C0 = 32'sd1137;   
-		41:  C0 = -32'sd2008;  
-		42:  C0 = 32'sd399;    
-		43:  C0 = 32'sd1702;   
-		44:  C0 = -32'sd1702;  
-		45:  C0 = -32'sd399;   
-		46:  C0 = 32'sd2008;   
-		47:  C0 = -32'sd1137;  
-		48:  C0 = 32'sd783;    
-		49:  C0 = -32'sd1892;  
-		50:  C0 = 32'sd1892;   
-		51:  C0 = -32'sd783;   
-		52:  C0 = -32'sd783;   
-		53:  C0 = 32'sd1892;   
-		54:  C0 = -32'sd1892;  
-		55:  C0 = 32'sd783;   
-		56:  C0 = 32'sd399;    
-		57:  C0 = -32'sd1137;  
-		58:  C0 = 32'sd1702;   
-		59:  C0 = -32'sd2008;  
-		60:  C0 = 32'sd2008;  
-		61:  C0 = -32'sd1702;  
-		62:  C0 = 32'sd1137;  
-		63:  C0 = -32'sd399;   
+		0:C0=32'sd1448;	1:C0=32'sd1448;	2:C0=32'sd1448;	3:C0=32'sd1448;	4:C0=32'sd1448; 5:C0=32'sd1448; 6:C0=32'sd1448; 7:   C0=32'sd1448;   
+		8:   C0=32'sd2008; 9:C0=32'sd1702; 10:C0=32'sd1137; 11: C0=32'sd399; 12: C0=-32'sd399; 13:  C0=-32'sd1137; 14:C0=-32'sd1702; 15:C0=-32'sd2008;
+		16:  C0 = 32'sd1892; 17:  C0 = 32'sd783; 18:  C0 = -32'sd783; 19:  C0 = -32'sd1892; 20:  C0 = -32'sd1892; 21:  C0 = -32'sd783; 22:  C0 = 32'sd783; 23:  C0 = 32'sd1892;   
+		24:  C0 = 32'sd1702; 25:  C0 = -32'sd399; 26:  C0 = -32'sd2008; 27:  C0 = -32'sd1137; 28:  C0 = 32'sd1137; 29:  C0 = 32'sd2008; 30:  C0 = 32'sd399; 31:  C0 = -32'sd1702; 
+		32:  C0 = 32'sd1448; 33:  C0 = -32'sd1448; 34:  C0 = -32'sd1448; 35:  C0 = 32'sd1448;   36:  C0 = 32'sd1448; 37:  C0 = -32'sd1448; 38:  C0 = -32'sd1448; 39:  C0 = 32'sd1448; 
+		40:  C0 = 32'sd1137; 41:  C0 = -32'sd2008; 42:  C0 = 32'sd399; 43:  C0 = 32'sd1702; 44:  C0 = -32'sd1702; 45:  C0 = -32'sd399; 46:  C0 = 32'sd2008; 47:  C0 = -32'sd1137;  
+		48:  C0 = 32'sd783; 49:  C0 = -32'sd1892; 50:  C0 = 32'sd1892; 51:  C0 = -32'sd783; 52:  C0 = -32'sd783; 53:  C0 = 32'sd1892; 54:  C0 = -32'sd1892; 55:  C0 = 32'sd783;   
+		56:  C0 = 32'sd399; 57:  C0 = -32'sd1137; 58:  C0 = 32'sd1702; 59:  C0 = -32'sd2008; 60:  C0 = 32'sd2008; 61:  C0 = -32'sd1702; 62:  C0 = 32'sd1137; 63:  C0 = -32'sd399;   
 	endcase
 	case (coeff[2])
-		0:   C0 = 32'sd1448;   
-		1:   C0 = 32'sd1448;   
-		2:   C0 = 32'sd1448;   
-		3:   C0 = 32'sd1448;   
-		4:   C0 = 32'sd1448;   
-		5:   C0 = 32'sd1448;   
-		6:   C0 = 32'sd1448;   
-		7:   C0 = 32'sd1448;   
-		8:   C0 = 32'sd2008;   
-		9:   C0 = 32'sd1702;   
-		10:  C0 = 32'sd1137;   
-		11:  C0 = 32'sd399;    
-		12:  C0 = -32'sd399;   
-		13:  C0 = -32'sd1137;  
-		14:  C0 = -32'sd1702;  
-		15:  C0 = -32'sd2008;  
-		16:  C0 = 32'sd1892;   
-		17:  C0 = 32'sd783;    
-		18:  C0 = -32'sd783;   
-		19:  C0 = -32'sd1892;  
-		20:  C0 = -32'sd1892;  
-		21:  C0 = -32'sd783;   
-		22:  C0 = 32'sd783;    
-		23:  C0 = 32'sd1892;   
-		24:  C0 = 32'sd1702;   
-		25:  C0 = -32'sd399;   
-		26:  C0 = -32'sd2008;  
-		27:  C0 = -32'sd1137;  
-		28:  C0 = 32'sd1137;   
-		29:  C0 = 32'sd2008;   
-		30:  C0 = 32'sd399;    
-		31:  C0 = -32'sd1702;  
-		32:  C0 = 32'sd1448;   
-		33:  C0 = -32'sd1448;  
-		34:  C0 = -32'sd1448;  
-		35:  C0 = 32'sd1448;   
-		36:  C0 = 32'sd1448;   
-		37:  C0 = -32'sd1448;  
-		38:  C0 = -32'sd1448;  
-		39:  C0 = 32'sd1448;   
-		40:  C0 = 32'sd1137;   
-		41:  C0 = -32'sd2008;  
-		42:  C0 = 32'sd399;    
-		43:  C0 = 32'sd1702;   
-		44:  C0 = -32'sd1702;  
-		45:  C0 = -32'sd399;   
-		46:  C0 = 32'sd2008;   
-		47:  C0 = -32'sd1137;  
-		48:  C0 = 32'sd783;    
-		49:  C0 = -32'sd1892;  
-		50:  C0 = 32'sd1892;   
-		51:  C0 = -32'sd783;   
-		52:  C0 = -32'sd783;   
-		53:  C0 = 32'sd1892;   
-		54:  C0 = -32'sd1892;  
-		55:  C0 = 32'sd783;   
-		56:  C0 = 32'sd399;    
-		57:  C0 = -32'sd1137;  
-		58:  C0 = 32'sd1702;   
-		59:  C0 = -32'sd2008;  
-		60:  C0 = 32'sd2008;  
-		61:  C0 = -32'sd1702;  
-		62:  C0 = 32'sd1137;  
-		63:  C0 = -32'sd399;   
+		0:C0=32'sd1448;	1:C0=32'sd1448;	2:C0=32'sd1448;	3:C0=32'sd1448;	4:C0=32'sd1448; 5:C0=32'sd1448; 6:C0=32'sd1448; 7:   C0=32'sd1448;   
+		8:   C0=32'sd2008; 9:C0=32'sd1702; 10:C0=32'sd1137; 11: C0=32'sd399; 12: C0=-32'sd399; 13:  C0=-32'sd1137; 14:C0=-32'sd1702; 15:C0=-32'sd2008;
+		16:  C0 = 32'sd1892; 17:  C0 = 32'sd783; 18:  C0 = -32'sd783; 19:  C0 = -32'sd1892; 20:  C0 = -32'sd1892; 21:  C0 = -32'sd783; 22:  C0 = 32'sd783; 23:  C0 = 32'sd1892;   
+		24:  C0 = 32'sd1702; 25:  C0 = -32'sd399; 26:  C0 = -32'sd2008; 27:  C0 = -32'sd1137; 28:  C0 = 32'sd1137; 29:  C0 = 32'sd2008; 30:  C0 = 32'sd399; 31:  C0 = -32'sd1702; 
+		32:  C0 = 32'sd1448; 33:  C0 = -32'sd1448; 34:  C0 = -32'sd1448; 35:  C0 = 32'sd1448;   36:  C0 = 32'sd1448; 37:  C0 = -32'sd1448; 38:  C0 = -32'sd1448; 39:  C0 = 32'sd1448; 
+		40:  C0 = 32'sd1137; 41:  C0 = -32'sd2008; 42:  C0 = 32'sd399; 43:  C0 = 32'sd1702; 44:  C0 = -32'sd1702; 45:  C0 = -32'sd399; 46:  C0 = 32'sd2008; 47:  C0 = -32'sd1137;  
+		48:  C0 = 32'sd783; 49:  C0 = -32'sd1892; 50:  C0 = 32'sd1892; 51:  C0 = -32'sd783; 52:  C0 = -32'sd783; 53:  C0 = 32'sd1892; 54:  C0 = -32'sd1892; 55:  C0 = 32'sd783;   
+		56:  C0 = 32'sd399; 57:  C0 = -32'sd1137; 58:  C0 = 32'sd1702; 59:  C0 = -32'sd2008; 60:  C0 = 32'sd2008; 61:  C0 = -32'sd1702; 62:  C0 = 32'sd1137; 63:  C0 = -32'sd399;    
 	endcase
 	case (coeff[3])
-		0:   C0 = 32'sd1448;   
-		1:   C0 = 32'sd1448;   
-		2:   C0 = 32'sd1448;   
-		3:   C0 = 32'sd1448;   
-		4:   C0 = 32'sd1448;   
-		5:   C0 = 32'sd1448;   
-		6:   C0 = 32'sd1448;   
-		7:   C0 = 32'sd1448;   
-		8:   C0 = 32'sd2008;   
-		9:   C0 = 32'sd1702;   
-		10:  C0 = 32'sd1137;   
-		11:  C0 = 32'sd399;    
-		12:  C0 = -32'sd399;   
-		13:  C0 = -32'sd1137;  
-		14:  C0 = -32'sd1702;  
-		15:  C0 = -32'sd2008;  
-		16:  C0 = 32'sd1892;   
-		17:  C0 = 32'sd783;    
-		18:  C0 = -32'sd783;   
-		19:  C0 = -32'sd1892;  
-		20:  C0 = -32'sd1892;  
-		21:  C0 = -32'sd783;   
-		22:  C0 = 32'sd783;    
-		23:  C0 = 32'sd1892;   
-		24:  C0 = 32'sd1702;   
-		25:  C0 = -32'sd399;   
-		26:  C0 = -32'sd2008;  
-		27:  C0 = -32'sd1137;  
-		28:  C0 = 32'sd1137;   
-		29:  C0 = 32'sd2008;   
-		30:  C0 = 32'sd399;    
-		31:  C0 = -32'sd1702;  
-		32:  C0 = 32'sd1448;   
-		33:  C0 = -32'sd1448;  
-		34:  C0 = -32'sd1448;  
-		35:  C0 = 32'sd1448;   
-		36:  C0 = 32'sd1448;   
-		37:  C0 = -32'sd1448;  
-		38:  C0 = -32'sd1448;  
-		39:  C0 = 32'sd1448;   
-		40:  C0 = 32'sd1137;   
-		41:  C0 = -32'sd2008;  
-		42:  C0 = 32'sd399;    
-		43:  C0 = 32'sd1702;   
-		44:  C0 = -32'sd1702;  
-		45:  C0 = -32'sd399;   
-		46:  C0 = 32'sd2008;   
-		47:  C0 = -32'sd1137;  
-		48:  C0 = 32'sd783;    
-		49:  C0 = -32'sd1892;  
-		50:  C0 = 32'sd1892;   
-		51:  C0 = -32'sd783;   
-		52:  C0 = -32'sd783;   
-		53:  C0 = 32'sd1892;   
-		54:  C0 = -32'sd1892;  
-		55:  C0 = 32'sd783;   
-		56:  C0 = 32'sd399;    
-		57:  C0 = -32'sd1137;  
-		58:  C0 = 32'sd1702;   
-		59:  C0 = -32'sd2008;  
-		60:  C0 = 32'sd2008;  
-		61:  C0 = -32'sd1702;  
-		62:  C0 = 32'sd1137;  
-		63:  C0 = -32'sd399;   
+		0:C0=32'sd1448;	1:C0=32'sd1448;	2:C0=32'sd1448;	3:C0=32'sd1448;	4:C0=32'sd1448; 5:C0=32'sd1448; 6:C0=32'sd1448; 7:   C0=32'sd1448;   
+		8:   C0=32'sd2008; 9:C0=32'sd1702; 10:C0=32'sd1137; 11: C0=32'sd399; 12: C0=-32'sd399; 13:  C0=-32'sd1137; 14:C0=-32'sd1702; 15:C0=-32'sd2008;
+		16:  C0 = 32'sd1892; 17:  C0 = 32'sd783; 18:  C0 = -32'sd783; 19:  C0 = -32'sd1892; 20:  C0 = -32'sd1892; 21:  C0 = -32'sd783; 22:  C0 = 32'sd783; 23:  C0 = 32'sd1892;   
+		24:  C0 = 32'sd1702; 25:  C0 = -32'sd399; 26:  C0 = -32'sd2008; 27:  C0 = -32'sd1137; 28:  C0 = 32'sd1137; 29:  C0 = 32'sd2008; 30:  C0 = 32'sd399; 31:  C0 = -32'sd1702; 
+		32:  C0 = 32'sd1448; 33:  C0 = -32'sd1448; 34:  C0 = -32'sd1448; 35:  C0 = 32'sd1448;   36:  C0 = 32'sd1448; 37:  C0 = -32'sd1448; 38:  C0 = -32'sd1448; 39:  C0 = 32'sd1448; 
+		40:  C0 = 32'sd1137; 41:  C0 = -32'sd2008; 42:  C0 = 32'sd399; 43:  C0 = 32'sd1702; 44:  C0 = -32'sd1702; 45:  C0 = -32'sd399; 46:  C0 = 32'sd2008; 47:  C0 = -32'sd1137;  
+		48:  C0 = 32'sd783; 49:  C0 = -32'sd1892; 50:  C0 = 32'sd1892; 51:  C0 = -32'sd783; 52:  C0 = -32'sd783; 53:  C0 = 32'sd1892; 54:  C0 = -32'sd1892; 55:  C0 = 32'sd783;   
+		56:  C0 = 32'sd399; 57:  C0 = -32'sd1137; 58:  C0 = 32'sd1702; 59:  C0 = -32'sd2008; 60:  C0 = 32'sd2008; 61:  C0 = -32'sd1702; 62:  C0 = 32'sd1137; 63:  C0 = -32'sd399;   
 	endcase
 
 
@@ -452,6 +240,7 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 		S_prime_counter[2] <= 6'd0;
 		S_prime_counter[3] <= 6'd0;
 		
+		
 		T_accumulator <= 32'd0;
 
 		coeff[0] <= 8'd0;
@@ -460,6 +249,35 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 		coeff[3] <= 8'd0;
 		T_col_counter <= 5'd0;
 		T_row_counter <= 5'd0;
+
+
+		S_counter <= 6'd0; // to read the same 4 T slots for calc S
+		S_accumulator[0] <= 32'd0;
+		S_accumulator[1] <= 32'd0;
+		S_col_counter <= 5'd0;
+		S_four_counter <= 4'b0;
+
+		S_S_counter[0] <= 6'd0;
+		S_S_counter[1] <= 6'd0;
+		S_S_counter[2] <= 6'd0;
+		S_S_counter[3] <= 6'd0;
+		S_S_counter[4] <= 6'd0;
+		S_S_counter[5] <= 6'd0;
+		S_S_counter[6] <= 6'd0;
+		S_S_counter[7] <= 6'd0;
+		
+		S_T_counter[0] <= 6'd0;
+		S_T_counter[1] <= 6'd0;
+		S_T_counter[2] <= 6'd0;
+		S_T_counter[3] <= 6'd0;
+		S_T_counter[4] <= 6'd0;
+		S_T_counter[5] <= 6'd0;
+		S_T_counter[6] <= 6'd0;
+		S_T_counter[7] <= 6'd0;
+
+
+
+		
 		
 		M2State <= S_M2_IDLE;
 	
@@ -470,6 +288,8 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 		S_M2_IDLE: begin
 			if(M2_Enable == 1'b1) begin
 				
+
+				//need to make if statements that set each
 				address_1 <= 7'b0;
 				address_2 <= 7'b0;
 				address_3 <= 7'b0;
@@ -485,8 +305,56 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 				row_counter <= 3'd0;
 				read_data_counter <= 3'd0;
 				YUV_counter_read <= 2'd0; // 0 = Y, 1 = U, 2 = V
-				SRAM_we_n <= 1'b1;	
+				//when do we do the intial stuff for SRAM/DRAM
+				// SRAM_we_n <= 1'b1;	
 				
+
+				S_counter <= 6'd0; 
+				S_accumulator <= 32'd0;
+				S_col_counter <= 5'd1;
+				S_four_counter <= 4'b1;
+				
+				S_S_counter[0] <= 6'd0;
+				S_S_counter[1] <= 6'd2;
+				S_S_counter[2] <= 6'd4;
+				S_S_counter[3] <= 6'd6;
+				S_S_counter[4] <= 6'd8;
+				S_S_counter[5] <= 6'd10;
+				S_S_counter[6] <= 6'd12;
+				S_S_counter[7] <= 6'd14;
+				
+				S_T_counter[0] <= 6'd0;
+				S_T_counter[1] <= 6'd8;
+				S_T_counter[2] <= 6'd16;
+				S_T_counter[3] <= 6'd24;
+				S_T_counter[4] <= 6'd32;
+				S_T_counter[5] <= 6'd40;
+				S_T_counter[6] <= 6'd48;
+				S_T_counter[7] <= 6'd56;
+
+				write_data_b[0] => 32'b0;
+				write_data_b[1] => 32'b0;
+				write_data_b[2] => 32'b0;
+				write_data_a[0] <= 32'b0;
+				write_data_a[1] <= 32'b0;
+				write_data_a[2] <= 32'b0;
+
+				write_enable_b[0] <= 1'b0;
+				write_enable_b[1] <= 1'b0;
+				write_enable_b[2] <= 1'b0;
+				write_enable_a[0] <= 1'b0;
+				write_enable_a[1] <= 1'b0;
+				write_enable_a[2] <= 1'b0;
+				
+				read_data_a[0] <= 32'b0;
+				read_data_a[1] <= 32'b0;
+				read_data_a[2] <= 32'b0;
+				read_data_b[0] <= 32'b0;
+				read_data_b[1] <= 32'b0;
+				read_data_b[2] <= 32'b0;
+				
+				
+
 				
 				M2State <= S_Read_LeadIn1;
 			end
@@ -692,6 +560,7 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			
 			YUV_counter_read <= 2'd2 ? 2'd0 : (YUV_counter_read + 2'd1); //sets the start address for the next read of s'
 			
+			///column counter turns to 2 next cc
 			col_counter <= 4'd1; // 
 			row_counter <= 4'd0;// 
 			
@@ -729,15 +598,16 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			
 			
 			//dont write on first period of common case
-			if (row_counter > 5'd0 && col_counter > 5'd1) begin
+			if (row_counter > 5'd0) begin
 				//WRITE T7
 				write_enable_a[1] = 1'b1;
-				write_data_a[1] <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;;
-				address_1 <= address_1 + 1'b1;
+				write_data_a[1] <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+				address_3 <= address_3 + 1'b1;
 			end
 			
-			
-			
+
+
+
 			M2State <= T_Calc_CommonCase2;
 		end
 		
@@ -760,6 +630,8 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			Mult3_op_2 <= read_data_b[0][15:0]; //Y2
 			Mult4_op_2 <= read_data_b[0][16:31]; //Y3
 			
+
+			
 			
 			
 			M2State <= T_Calc_CommonCase3;
@@ -767,6 +639,7 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 		
 		//calculating T0
 		//RECEIVE (Y4,Y5) (Y6,Y7)
+		//RECIEVE T0 1/2
 		T_Calc_CommonCase3: begin
 			
 			write_enable_a[0] = 1'b0;
@@ -786,13 +659,15 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			Mult3_op_2 <= read_data_b[0][15:0]; //Y6
 			Mult4_op_2 <= read_data_b[0][16:31]; //Y6
 			
-			col_counter <= 4'd1 + T_col_counter;
+
+			//column counter turns to 2 next cc
 			T_col_counter <= T_col_counter + 5'd1;
 			
 			
 			M2State <= T_Calc_CommonCase4;
 		end
 		
+		//RECIEVE T0 
 		T_Calc_CommonCase4: begin
 			
 			write_enable_a[0] = 1'b0;
@@ -803,7 +678,7 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			//WRITE T0
 			write_enable_a[1] = 1'b1;
 			write_data_a[1] <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;;
-			address_1 <= address_1 + 1'b1;
+			address_3 <= address_3 + 1'b1;
 			
 			
 			
@@ -821,6 +696,7 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			M2State <= T_Calc_CommonCase5;
 		end
 		
+		//RECIEVE T0 1/2
 		T_Calc_CommonCase5: begin
 			
 			write_enable_a[0] = 1'b0;
@@ -839,8 +715,7 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			Mult3_op_2 <= read_data_b[0][15:0]; 
 			Mult4_op_2 <= read_data_b[0][16:31]; 
 			
-			
-			col_counter <= 4'd1 + T_col_counter
+			//column counter turns to 3 next cc
 			T_col_counter <= T_col_counter + 5'd1;
 			
 			M2State <= T_Calc_CommonCase6;
@@ -854,7 +729,13 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			address_1 <= S_prime_counter[0]; //READ FROM THE START OF ALL THE S' VALUES WE WROTE
 			address_2 <= S_prime_counter[1];
 			
-			T_accumulator <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			//WRITE T1
+			write_enable_a[1] = 1'b1;
+			write_data_a[1] <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			address_3 <= address_3 + 1'b1;
+
+
+			// T_accumulator <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
 			
 			coeff[0] <= 8'd2; //etc
 			coeff[1] <= 8'd10; 
@@ -886,7 +767,8 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			Mult3_op_2 <= read_data_b[0][15:0]; 
 			Mult4_op_2 <= read_data_b[0][16:31]; 
 			
-			col_counter <= 4'd1 + T_col_counter
+
+			//column counter turns to 4 next cc
 			T_col_counter <= T_col_counter + 5'd1;
 			
 			M2State <= T_Calc_CommonCase8;
@@ -898,7 +780,12 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			address_1 <= S_prime_counter[0]; //READ FROM THE START OF ALL THE S' VALUES WE WROTE
 			address_2 <= S_prime_counter[1];
 			
-			T_accumulator <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			//WRITE T2
+			write_enable_a[1] = 1'b1;
+			write_data_a[1] <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			address_3 <= address_3 + 1'b1;
+			
+			// T_accumulator <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
 			
 			coeff[0] <= 8'd3; //etc
 			coeff[1] <= 8'd11; 
@@ -929,7 +816,7 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			Mult3_op_2 <= read_data_b[0][15:0]; 
 			Mult4_op_2 <= read_data_b[0][16:31]; 
 			
-			col_counter <= 4'd1 + T_col_counter
+			//column counter turns to 5 next cc
 			T_col_counter <= T_col_counter + 5'd1;
 			
 			M2State <= T_Calc_CommonCase10;
@@ -941,7 +828,13 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			address_1 <= S_prime_counter[0]; //READ FROM THE START OF ALL THE S' VALUES WE WROTE
 			address_2 <= S_prime_counter[1];
 			
-			T_accumulator <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			//WRITE T3
+			write_enable_a[1] = 1'b1;
+			write_data_a[1] <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			address_3 <= address_3 + 1'b1;
+
+
+			// T_accumulator <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
 			
 			coeff[0] <= 8'd4; //etc
 			coeff[1] <= 8'd12; 
@@ -972,7 +865,7 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			Mult3_op_2 <= read_data_b[0][15:0]; 
 			Mult4_op_2 <= read_data_b[0][16:31]; 
 			
-			col_counter <= 4'd1 + T_col_counter
+			//column counter turns to 6 next cc
 			T_col_counter <= T_col_counter + 5'd1;
 			
 			M2State <= T_Calc_CommonCase12;
@@ -984,7 +877,12 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			address_1 <= S_prime_counter[0]; //READ FROM THE START OF ALL THE S' VALUES WE WROTE
 			address_2 <= S_prime_counter[1];
 			
-			T_accumulator <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			//WRITE T4
+			write_enable_a[1] = 1'b1;
+			write_data_a[1] <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			address_3 <= address_3 + 1'b1;
+
+			// T_accumulator <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
 			
 			coeff[0] <= 8'd5; //etc
 			coeff[1] <= 8'd13; 
@@ -1015,7 +913,7 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			Mult3_op_2 <= read_data_b[0][15:0]; 
 			Mult4_op_2 <= read_data_b[0][16:31]; 
 			
-			col_counter <= 4'd1 + T_col_counter
+			//column counter turns to 7 next cc
 			T_col_counter <= T_col_counter + 5'd1;
 			
 			M2State <= T_Calc_CommonCase14;
@@ -1027,7 +925,12 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			address_1 <= S_prime_counter[0]; //READ FROM THE START OF ALL THE S' VALUES WE WROTE
 			address_2 <= S_prime_counter[1];
 			
-			T_accumulator <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			//WRITE T5
+			write_enable_a[1] = 1'b1;
+			write_data_a[1] <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			address_3 <= address_3 + 1'b1;
+
+			// T_accumulator <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
 			
 			coeff[0] <= 8'd6; //etc
 			coeff[1] <= 8'd14; 
@@ -1058,7 +961,7 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			Mult3_op_2 <= read_data_b[0][15:0]; 
 			Mult4_op_2 <= read_data_b[0][16:31]; 
 			
-			col_counter <= 4'd1 + T_col_counter
+			//column counter turns to 8 next cc
 			T_col_counter <= T_col_counter + 5'd1;
 			
 			M2State <= T_Calc_CommonCase16;
@@ -1066,11 +969,16 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 		
 		T_Calc_CommonCase16: begin
 			
-				write_enable_a[0] = 1'b0;
+			write_enable_a[0] = 1'b0;
 			address_1 <= S_prime_counter[0]; //READ FROM THE START OF ALL THE S' VALUES WE WROTE
 			address_2 <= S_prime_counter[1];
 			
-			T_accumulator <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			//WRITE T6
+			write_enable_a[1] = 1'b1;
+			write_data_a[1] <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			address_3 <= address_3 + 1'b1;
+
+			// T_accumulator <= T_accumulator + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
 			
 			coeff[0] <= 8'd7; //etc
 			coeff[1] <= 8'd15; 
@@ -1101,20 +1009,561 @@ always_ff @ (posedge Clock or negedge Resetn) begin
 			Mult3_op_2 <= read_data_b[0][15:0]; 
 			Mult4_op_2 <= read_data_b[0][16:31]; 
 			
-			col_counter <= 4'd1 + T_col_counter
-			T_col_counter <= T_col_counter + 5'd1;
+			//column counter turns to 1 next cc
+			T_col_counter <= 5'd1;
 			
-			row_counter <= T_row_counter;
+			
 			T_row_counter <= T_row_counter + 5'd1;
+
+			if (T_row_counter == 5'd7) begin 
+				M2State <= S_M2_IDLE;
+				//add reset stuff idk
+			end
+			
+			S_prime_counter[0] <= S_prime_counter[0] + 16'd1;
+			S_prime_counter[1] <= S_prime_counter[1] + 16'd1;
+			S_prime_counter[2] <= S_prime_counter[2] + 16'd1;
+			S_prime_counter[3] <= S_prime_counter[3] + 16'd1;
+
+			
+			
 			
 			M2State <= T_Calc_CommonCase1;
 		end
 		
 		
+
+
+
+
+		
+
+
+
+
+
+
+
+		//MEGASTATE 3: CALC S **************************************************************
+
+		S_Calc_Lead_In1: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[0]; //READ T0
+			address_4 <= S_T_counter[1]; //READ T8
+			
+			M2State <= S_Calc_Lead_In2;
+		end
+
+		S_Calc_Lead_In2: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[2]; //READ T16
+			address_4 <= S_T_counter[3]; //READ T24
+
+			///column counter turns to 2 next cc
+			col_counter <= 4'd1;
+			row_counter <= 4'd1;
+			
+			M2State <= S_Calc_CommonCase1;
+		end
+
+		//calculating T0
+		//RECEIVE (T0,T8) 
+		S_Calc_CommonCase1: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[4]; //READ T32
+			address_4 <= S_T_counter[5]; //READ T40
+			
+			
+			//S0 1/4      S8 1/4
+			coeff[0] <= 8'd0; //1448
+			coeff[1] <= 8'd1; //1448
+			coeff[2] <= 8'd2; //2008
+			coeff[3] <= 8'd3; //1702
+			Mult1_op_2 <= read_data_a[1]; //T0
+			Mult2_op_2 <= read_data_b[1]; //T8
+			Mult3_op_2 <= read_data_a[1]; //T0
+			Mult4_op_2 <= read_data_b[1]; //T8
+			
+			// S_accumulator[0] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			// S_accumulator[1] <= S_accumulator[1] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+
+			//WRITE S48,S56
+			if (S_row_counter > 5'd0) begin
+				//write s48, s56 to address 0,2
+				write_enable_a[1] = 1'b1;
+				//concat of S_accumulators
+				// ! ADD IMPLEMENTATION THAT WRITES TO CORRECT PART OF DRAM ADDRESS [0:15] [16:31]
+				write_data_a[1] <= { (S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4) , (S_accumulator[1] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4)};
+				
+				
+			end
+			
+			
+			M2State <= S_Calc_CommonCase2;
+		end
+
+
+		//calculating T0
+		//RECEIVE (T16,T24) 
+		S_Calc_CommonCase2: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[6]; //READ T48
+			address_4 <= S_T_counter[7]; //READ T56
+			
+			
+			//S0 2/4      S8 2/4
+			coeff[0] <= 8'd4; //1448
+			coeff[1] <= 8'd5; //1448
+			coeff[2] <= 8'd6; //1137
+			coeff[3] <= 8'd7; //399
+			Mult1_op_2 <= read_data_a[1]; //T16
+			Mult2_op_2 <= read_data_b[1]; //T24
+			Mult3_op_2 <= read_data_a[1]; //T16
+			Mult4_op_2 <= read_data_b[1]; //T24
+			
+			//WRITE S48,S56
+			if (S_row_counter > 5'd0) begin
+				//write s48, s56 to address 0,2
+				write_enable_a[1] = 1'b1;
+				//
+				S_four_counter <= S_four_counter + 5'd1;
+				//concat of S_accumulators
+				// ! ADD IMPLEMENTATION THAT WRITES TO CORRECT PART OF DRAM ADDRESS [0:15] [16:31]
+				write_data_a[1] <= { (S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4) , (S_accumulator[1] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4)};
+					if (S_four_counter == 5'd4) begin
+						S_S_counter[7] <= S_S_counter[7] + 16'd1; 
+						S_S_counter[6] <= S_S_counter[6] + 16'd1; 
+						S_S_counter[5] <= S_S_counter[5] + 16'd1; 
+						S_S_counter[4] <= S_S_counter[4] + 16'd1; 
+						S_S_counter[3] <= S_S_counter[3] + 16'd1; 
+						S_S_counter[2] <= S_S_counter[2] + 16'd1; 
+						S_S_counter[1] <= S_S_counter[1] + 16'd1; 
+						S_S_counter[0] <= S_S_counter[0] + 16'd1; 
+					end
+
+				
+			end
+			//S0 1/4      S8 1/4
+			S_accumulator[0] <= Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			S_accumulator[1] <= Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+
+
+			
+			
+			
+			M2State <= S_Calc_CommonCase3;
+		end
+
+		//calculating T0
+		//RECEIVE (T32,T40) 
+		S_Calc_CommonCase3: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[0]; //READ T0
+			address_4 <= S_T_counter[1]; //READ T8
+			
+			
+			//S0  3/4     S8     3/4
+			coeff[0] <= 8'd8; //1448
+			coeff[1] <= 8'd9; //1448
+			coeff[2] <= 8'd10; //-399
+			coeff[3] <= 8'd11; //1137
+			Mult1_op_2 <= read_data_a[1]; //T32
+			Mult2_op_2 <= read_data_b[1]; //T40
+			Mult3_op_2 <= read_data_a[1]; //T32
+			Mult4_op_2 <= read_data_b[1]; //T40
+			
+
+			//S0 2/4      S8 2/4 
+			S_accumulator[0] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			S_accumulator[1] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+
+
+
+			M2State <= S_Calc_CommonCase4;
+		end
+		
+		S_Calc_CommonCase4: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[2]; //READ T16
+			address_4 <= S_T_counter[3]; //READ T24
+			
+			
+			//S0       S8 
+			coeff[0] <= 8'd12; 
+			coeff[1] <= 8'd13;
+			coeff[2] <= 8'd14; 
+			coeff[3] <= 8'd15; 
+			Mult1_op_2 <= read_data_a[1]; //T48
+			Mult2_op_2 <= read_data_b[1]; //T56
+			Mult3_op_2 <= read_data_a[1]; //T48
+			Mult4_op_2 <= read_data_b[1]; //T56
+			
+			//getting write ready for next state
+			write_enable_a[2] = 1'b1;
+			address_5 <= S_S_counter[0];
+			address_6 <= S_S_counter[1];
+
+			//S0 3/4      S8 3/4
+			S_accumulator[0] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			S_accumulator[1] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+
+	
+			M2State <= S_Calc_CommonCase5;
+		end	
+		S_Calc_CommonCase5: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[4]; //READ T32
+			address_4 <= S_T_counter[5]; //READ T40
+			
+			
+			//S0 1/4     S8 1/4
+			coeff[0] <= 8'd16; 
+			coeff[1] <= 8'd17; 
+			coeff[2] <= 8'd18;
+			coeff[3] <= 8'd19; 
+			Mult1_op_2 <= read_data_a[1]; //T48
+			Mult2_op_2 <= read_data_b[1]; //T56
+			Mult3_op_2 <= read_data_a[1]; //T48
+			Mult4_op_2 <= read_data_b[1]; //T56
+			
+			//WRITE S0,S8
+			// ! ADD IMPLEMENTATION THAT WRITES TO CORRECT PART OF DRAM ADDRESS [0:15] [16:31]
+				write_data_a[2] <= { (S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4) , (S_accumulator[1] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4)};
+	
+			M2State <= S_Calc_CommonCase6;
+		end	
+		T_Calc_CommonCase6: begin
+			
+			//calculating T0
+		//RECEIVE (T16,T24) 
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[6]; //READ T48
+			address_4 <= S_T_counter[7]; //READ T56
+			
+			
+			//S0 2/4      S8 2/4
+			coeff[0] <= 8'd20; 
+			coeff[1] <= 8'd21; 
+			coeff[2] <= 8'd22; 
+			coeff[3] <= 8'd23; 
+			Mult1_op_2 <= read_data_a[1]; //T16
+			Mult2_op_2 <= read_data_b[1]; //T24
+			Mult3_op_2 <= read_data_a[1]; //T16
+			Mult4_op_2 <= read_data_b[1]; //T24
+			
+
+			//S0 1/4      S8 1/4
+			S_accumulator[0] <= Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			S_accumulator[1] <= Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+
+	
+			M2State <= S_Calc_CommonCase7;
+		end	
+		S_Calc_CommonCase7: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[0]; //READ T0
+			address_4 <= S_T_counter[1]; //READ T8
+			
+			
+			//S0  3/4     S8     3/4
+			coeff[0] <= 8'd24;
+			coeff[1] <= 8'd25; 
+			coeff[2] <= 8'd26; 
+			coeff[3] <= 8'd27; 
+			Mult1_op_2 <= read_data_a[1]; //T32
+			Mult2_op_2 <= read_data_b[1]; //T40
+			Mult3_op_2 <= read_data_a[1]; //T32
+			Mult4_op_2 <= read_data_b[1]; //T40
+			
+
+			//S0 2/4      S8 2/4 
+			S_accumulator[0] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			S_accumulator[1] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+
+	
+			M2State <= S_Calc_CommonCase8;
+		end	
+		S_Calc_CommonCase8: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[2]; //READ T16
+			address_4 <= S_T_counter[3]; //READ T24
+			
+			
+			//S0       S8 
+			coeff[0] <= 8'd28; 
+			coeff[1] <= 8'd29;
+			coeff[2] <= 8'd30; 
+			coeff[3] <= 8'd31; 
+			Mult1_op_2 <= read_data_a[1]; //T48
+			Mult2_op_2 <= read_data_b[1]; //T56
+			Mult3_op_2 <= read_data_a[1]; //T48
+			Mult4_op_2 <= read_data_b[1]; //T56
+			
+			//getting write ready for next state
+			write_enable_a[2] = 1'b1;
+			address_5 <= S_S_counter[2];
+			address_6 <= S_S_counter[3];
+
+			//S0 3/4      S8 3/4
+			S_accumulator[0] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			S_accumulator[1] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+
+	
+			M2State <= S_Calc_CommonCase9;
+		end	
+		S_Calc_CommonCase9: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[4]; //READ T32
+			address_4 <= S_T_counter[5]; //READ T40
+			
+			
+			//S0 1/4     S8 1/4
+			coeff[0] <= 8'd32; 
+			coeff[1] <= 8'd33; 
+			coeff[2] <= 8'd34;
+			coeff[3] <= 8'd35; 
+			Mult1_op_2 <= read_data_a[1]; //T48 
+			Mult2_op_2 <= read_data_b[1]; //T56 
+			Mult3_op_2 <= read_data_a[1]; //T48 
+			Mult4_op_2 <= read_data_b[1]; //T56 
+			
+			//WRITE S0,S8
+			// ! ADD IMPLEMENTATION THAT WRITES TO CORRECT PART OF DRAM ADDRESS [0:15] [16:31]
+				write_data_a[2] <= { (S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4) , (S_accumulator[1] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4)};
+	
+	
+			M2State <= S_Calc_CommonCase10;
+		end	
+		S_Calc_CommonCase10: begin
+			
+
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[6]; //READ T48
+			address_4 <= S_T_counter[7]; //READ T56
+			
+			
+			//S0 2/4      S8 2/4
+			coeff[0] <= 8'd36; 
+			coeff[1] <= 8'd37; 
+			coeff[2] <= 8'd38; 
+			coeff[3] <= 8'd39; 
+			Mult1_op_2 <= read_data_a[1]; //T16
+			Mult2_op_2 <= read_data_b[1]; //T24
+			Mult3_op_2 <= read_data_a[1]; //T16
+			Mult4_op_2 <= read_data_b[1]; //T24
+			
+
+			//S0 1/4      S8 1/4
+			S_accumulator[0] <= Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			S_accumulator[1] <= Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+	
+			M2State <= S_Calc_CommonCase11;
+		end	
+		S_Calc_CommonCase11: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[0]; //READ T0
+			address_4 <= S_T_counter[1]; //READ T8
+			
+			
+			//S0  3/4     S8     3/4
+			coeff[0] <= 8'd40;
+			coeff[1] <= 8'd41; 
+			coeff[2] <= 8'd42; 
+			coeff[3] <= 8'd43; 
+			Mult1_op_2 <= read_data_a[1]; //T32
+			Mult2_op_2 <= read_data_b[1]; //T40
+			Mult3_op_2 <= read_data_a[1]; //T32
+			Mult4_op_2 <= read_data_b[1]; //T40
+			
+
+			//S0 2/4      S8 2/4 
+			S_accumulator[0] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			S_accumulator[1] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+	
+			M2State <= S_Calc_CommonCase12;
+		end	
+		S_Calc_CommonCase12: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[2]; //READ T16
+			address_4 <= S_T_counter[3]; //READ T24
+			
+			
+			//S0       S8 
+			coeff[0] <= 8'd44; 
+			coeff[1] <= 8'd45;
+			coeff[2] <= 8'd46; 
+			coeff[3] <= 8'd47; 
+			Mult1_op_2 <= read_data_a[1]; //T48
+			Mult2_op_2 <= read_data_b[1]; //T56
+			Mult3_op_2 <= read_data_a[1]; //T48
+			Mult4_op_2 <= read_data_b[1]; //T56
+			
+			//getting write ready for next state
+			write_enable_a[2] = 1'b1;
+			address_5 <= S_S_counter[4];
+			address_6 <= S_S_counter[5];
+
+
+			//S0 3/4      S8 3/4
+			S_accumulator[0] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			S_accumulator[1] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+	
+			M2State <= S_Calc_CommonCase13;
+		end	
+		S_Calc_CommonCase13: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[4]; //READ T32
+			address_4 <= S_T_counter[5]; //READ T40
+			
+			
+			//S0 1/4     S8 1/4
+			coeff[0] <= 8'd48; 
+			coeff[1] <= 8'd49; 
+			coeff[2] <= 8'd50;
+			coeff[3] <= 8'd51; 
+			Mult1_op_2 <= read_data_a[1]; //T0 
+			Mult2_op_2 <= read_data_b[1]; //T8 
+			Mult3_op_2 <= read_data_a[1]; //T0 
+			Mult4_op_2 <= read_data_b[1]; //T8 
+			
+			//WRITE S0,S8
+			// ! ADD IMPLEMENTATION THAT WRITES TO CORRECT PART OF DRAM ADDRESS [0:15] [16:31]
+				write_data_a[2] <= { (S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4) , (S_accumulator[1] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4)};
+	
+	
+			M2State <= S_Calc_CommonCase14;
+		end	
+		S_Calc_CommonCase14: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[6]; //READ T48
+			address_4 <= S_T_counter[7]; //READ T56
+			
+			
+			//S0 2/4      S8 2/4
+			coeff[0] <= 8'd52; 
+			coeff[1] <= 8'd53; 
+			coeff[2] <= 8'd54; 
+			coeff[3] <= 8'd55; 
+			Mult1_op_2 <= read_data_a[1]; //T16
+			Mult2_op_2 <= read_data_b[1]; //T24
+			Mult3_op_2 <= read_data_a[1]; //T16
+			Mult4_op_2 <= read_data_b[1]; //T24
+			
+
+			//S0 1/4      S8 1/4
+			S_accumulator[0] <= Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			S_accumulator[1] <= Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+	
+			M2State <= S_Calc_CommonCase15;
+		end	
+		S_Calc_CommonCase15: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[0]; //READ T0
+			address_4 <= S_T_counter[1]; //READ T8
+			
+			
+			//S0  3/4     S8     3/4
+			coeff[0] <= 8'd56;
+			coeff[1] <= 8'd57; 
+			coeff[2] <= 8'd58; 
+			coeff[3] <= 8'd59; 
+			Mult1_op_2 <= read_data_a[1]; //T32
+			Mult2_op_2 <= read_data_b[1]; //T40
+			Mult3_op_2 <= read_data_a[1]; //T32
+			Mult4_op_2 <= read_data_b[1]; //T40
+			
+
+			//S0 2/4      S8 2/4 
+			S_accumulator[0] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			S_accumulator[1] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+	
+			M2State <= S_Calc_CommonCase15;
+		end	
+		S_Calc_CommonCase16: begin
+			
+			write_enable_a[1] = 1'b0;
+			address_3 <= S_T_counter[2]; //READ T16
+			address_4 <= S_T_counter[3]; //READ T24
+			
+			
+			//S0       S8 
+			coeff[0] <= 8'd60; 
+			coeff[1] <= 8'd61;
+			coeff[2] <= 8'd62; 
+			coeff[3] <= 8'd63; 
+			Mult1_op_2 <= read_data_a[1]; //T48
+			Mult2_op_2 <= read_data_b[1]; //T56
+			Mult3_op_2 <= read_data_a[1]; //T48
+			Mult4_op_2 <= read_data_b[1]; //T56
+			
+			//getting write ready for next state
+			//setting for commmon case 1
+			write_enable_a[2] = 1'b1;
+			address_5 <= S_S_counter[4];
+			address_6 <= S_S_counter[5];
+
+			//increment for next column of S values
+			S_T_counter[0] <= S_T_counter[0] + 6'd1;
+			S_T_counter[1] <= S_T_counter[1] + 6'd1;
+			S_T_counter[2] <= S_T_counter[2] + 6'd1;
+			S_T_counter[3] <= S_T_counter[3] + 6'd1;
+			S_T_counter[4] <= S_T_counter[4] + 6'd1;
+			S_T_counter[5] <= S_T_counter[5] + 6'd1;
+			S_T_counter[6] <= S_T_counter[6] + 6'd1;
+			S_T_counter[7] <= S_T_counter[7] + 6'd1;
+
+
+			//S0 3/4      S8 3/4
+			S_accumulator[0] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+			S_accumulator[1] <= S_accumulator[0] + Mult_result1 + Mult_result2 + Mult_result3 + Mult_result4;
+
+			S_col_counter <= col_counter + 5'd1;
+			
+
+
+			M2State <= S_Calc_CommonCase1;
+		end	
+		
+
+				
+
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
 		
 		
 		
-	//T_Calc_CommonCase1,
+		
+	//MEGASTATE 4: WRITE S **************************************************************
 
 
 		S_Write_LeadIn1: begin
